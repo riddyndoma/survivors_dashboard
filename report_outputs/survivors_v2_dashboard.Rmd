@@ -1,0 +1,486 @@
+---
+title: "PROJET Suivi des gueris - Tableau de bord - Date : "
+date: "`r format(Sys.time(), '%A %d %B %Y')`"
+output:
+    flexdashboard::flex_dashboard:
+      orientation: columns
+      theme: cosmo
+---
+
+```{r setup, include=FALSE}
+library(htmlwidgets)
+library(flexdashboard)
+library(sqldf)
+library(formattable)
+library(kableExtra)
+require(dplyr)
+library(ggplot2)
+library(purrr)
+library(data.table)
+library(lubridate)
+library(gganimate)
+
+path_to_functions <- here::here("functions")
+scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
+for (file in scripts_files) source(file, local = TRUE)
+```
+
+```{r load_data, include = FALSE}
+
+clean_folder <- here::here("data", "clean")
+
+current_clean_cases <- get_latest_data("^cases.*.rds", clean_folder)
+current_clean_contacts <- get_latest_data("^contacts.*.rds", clean_folder)
+current_clean_followups <- get_latest_data("^followups.*.rds", clean_folder)
+#current_clean_locations <- get_latest_data("^location*.rds", clean_folder)
+
+current_clean_cases
+current_clean_cases <- rio::import(current_clean_cases) %>%
+  as_tibble()
+
+current_clean_contacts
+current_clean_contacts <- rio::import(current_clean_contacts) %>%
+  as_tibble()
+
+current_clean_followups
+current_clean_followups <- rio::import(current_clean_followups) %>%
+  as_tibble()
+
+
+```
+
+```{r define_time_periods, include = FALSE}
+
+database_date <- Sys.Date()
+current_month <- formatDate <- format(Sys.Date(), "%Y-%m")
+current_week=week(database_date)
+
+# Extract time periods: yesterday i.e. date of database
+prev_1_date <- database_date - 1
+# prev_1_date <- max(followups$date_of_followup)
+ prev_7_date <- prev_1_date - 7
+ prev_30_date <- prev_1_date - 30
+
+# Create data of these time points, by filtering follow up list for only these date ranges 
+f_1day <- current_clean_followups %>% 
+  filter(date_of_followup == prev_1_date) %>% 
+  mutate(days = as.character(prev_1_date)) 
+
+f_0day <- current_clean_followups %>%
+  filter(date_of_followup == database_date) %>% 
+  mutate(days = as.character(database_date)) 
+
+f_7day <- current_clean_followups %>%
+  filter(date_of_followup >= prev_7_date) %>% 
+  mutate(days = as.character(prev_7_date)) 
+
+f_21day <- current_clean_followups %>%
+  filter(date_of_followup >= prev_30_date) %>% 
+  mutate(days = as.character(prev_30_date))
+
+f_current_month <- current_clean_followups %>%
+  filter(format(date_of_followup, "%Y-%m") ==current_month)
+
+```
+
+
+```{r summary_counts, include = FALSE}
+
+
+total_active_contacts_reg <- current_clean_contacts %>%
+  count() 
+
+total_cases_reg <- current_clean_cases %>%
+  count()
+
+
+total_active_sup <- current_clean_contacts %>%
+  distinct(sup) %>%
+  count()
+
+total_followups_generated_last30days <- current_clean_followups %>%
+  count()
+
+total_followups_forms_completed_last30days <- current_clean_followups %>%
+  filter(performed == TRUE) %>%
+  count()
+
+total_followups_seen_with_signs_last30days <- current_clean_followups %>%
+  filter(status == "Vu avec signe") %>%
+  count()
+
+total_followups_seen_no_signs_last30days <- current_clean_followups %>%
+  filter(status == "Vu sans signe") %>%
+  count()
+
+total_survivors_followed_today=f_0day %>%
+  filter(status == "Vu avec signe" | status == "Vu sans signe") %>%
+  count()
+
+total_survivors_followed_yesterday=f_1day %>%
+  filter(status == "Vu avec signe" | status == "Vu sans signe") %>%
+  count()
+  
+
+```
+
+INDICATEURS GENERAUX {data-icon="fa-chart-line"}
+=====================================================
+
+Column {data-width=75}
+-----------------------------------------------------------------------
+
+### Suivis générés, 30 derniers jours
+```{r total_countries, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 30 derniers jours
+```{r total_followups_seen_with_signs_last30days, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 30 derniers jours
+```{r total_followups_seen_no_signs_last30days, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+### Guéris suivi aujourd'hui
+```{r total_survivors_followed_today, echo = FALSE}
+
+valueBox(total_survivors_followed_today, color = "#71CA97")  
+
+```
+
+Column {data-width=309}
+-----------------------------------------------------------------------
+
+### Tab1
+```{r}
+gueris_18=current_clean_contacts %>%
+  filter(age >= 18) %>%
+  count() %>%
+as.data.frame() #Methode rownames depreciated pour tibble
+rownames(gueris_18)=c("Total des guéris supérieur ou égal à 18 ans")
+
+gueris_5_17=current_clean_contacts %>%
+  filter(age >= 5 && age <= 17) %>%
+  count()%>%
+as.data.frame()
+rownames(gueris_5_17)=c("Total des guéris 5 - 17 ans")
+
+gueris_m5=current_clean_contacts %>%
+  filter(age < 5) %>%
+  count()%>%
+as.data.frame()
+rownames(gueris_m5)=c("Total des guéris de moins de 5 ans")
+
+tab1_values=rbind(gueris_18, gueris_5_17,gueris_m5)
+colnames(tab1_values)=c("Nombre")
+
+#Convertir le rownames en premiere colonne
+setDT(tab1_values, keep.rownames = "Designation")
+show_tab1=tab1_values %>%
+  select(Designation,Nombre) %>%
+  kable("html",caption = "<b><i><div style='background-color: #95d8fa;font-size: 100%;'>Indicateurs définitifs </div></b></i>", col.names = NULL) %>%
+  kable_classic() %>%
+  #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  # row_spec(row = 0, bold = TRUE, color = "black")
+  kable_styling(bootstrap_options = c("striped", "hover"))
+show_tab1
+
+#Le nombre de suivi effectues
+f_current_month_recus = f_current_month %>%
+  filter(status == "Vu avec signe"|status == "Vu sans signe") %>%
+  count()
+#Le nombre de suivis generes au courant du mois
+f_current_month_denom=f_current_month %>%
+  count()
+
+#taux_suivi_mensuel=round((f_current_month_recus/f_current_month_denom)*100,1)
+taux_suivi_mensuel=round((f_current_month_recus/1142)*100,1)
+taux_suivi_mensuel=as.data.frame(taux_suivi_mensuel)
+rownames(taux_suivi_mensuel)=c("Taux de suivi mensuel")
+colnames(taux_suivi_mensuel)=c("Pourcentage")
+
+setDT(taux_suivi_mensuel, keep.rownames = "Designation") #Convertir le rownames en premiere colonne
+show_tab2=taux_suivi_mensuel %>%
+  select(Designation,Pourcentage) %>%
+  kable("html", caption = "<b><i>\n\n\n\n\n\n<div style='background-color: #cdedfc;font-size: 100%;'>Indicateurs du mois encours</div></b></i>", col.names = NULL) %>%
+  kable_classic() %>%
+  #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  # row_spec(row = 0, bold = TRUE, color = "black")
+  kable_styling(bootstrap_options = c("striped", "hover"))
+show_tab2
+
+
+```
+
+### Tab2
+```{r}
+analysis_prep <- here::here("preparation/analysis_functions.R")
+source(analysis_prep)
+
+f_rate_current_week=getFollowersRateByWeeks(current_clean_followups,0)
+f_rate_1week=getFollowersRateByWeeks(current_clean_followups,1)
+f_rate_2weeks=getFollowersRateByWeeks(current_clean_followups,2)
+f_rate_3weeks=getFollowersRateByWeeks(current_clean_followups,3)
+f_rate_4weeks=getFollowersRateByWeeks(current_clean_followups,4)
+
+f_rate_weekly=rbind(f_rate_4weeks,f_rate_3weeks,f_rate_2weeks,f_rate_1week,f_rate_current_week)
+setDT(f_rate_weekly, keep.rownames = "semaine") #Convertir le rownames en premiere colonne
+
+#p=ggplot(data = f_rate_weekly,aes(x=semaine,y=n))+geom_line() +geom_point()
+p=ggplot(data=f_rate_weekly)+aes(x=semaine,y=n)+geom_density()
+p=p+theme_classic()+labs(x="",y="Taux", title = "Taux de suivi des gueris par semaine", subtitle = )
+p
+
+
+```
+
+Column {data-width=308}
+-----------------------------------------------------------------------
+### AC1
+
+```{r}
+survivors_men=getSurvivorsBySex(current_clean_contacts,"m") %>%
+  mutate(sexe="Homme")
+survivors_women=getSurvivorsBySex(current_clean_contacts,"f") %>%
+  mutate(sexe="Femme")
+survivors_na_sexe=getSurvivorsBySex(current_clean_contacts,"") %>%
+  mutate(sexe="NA")
+survivors_men_and_women=rbind(survivors_women,survivors_men,survivors_na_sexe)
+
+g=ggplot(data=survivors_men_and_women, aes(x=sexe, y=n, fill=sexe,stat="identity")) +
+  scale_fill_brewer(palette="Cavalcanti") +
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "Repartition des guéris suivant le sexe", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g
+
+```
+
+### AC2
+
+```{r}
+analysis_prep <- here::here("preparation/analysis_functions.R")
+source(analysis_prep)
+
+f_hme_current_week=getFollowersBySexe(current_clean_followups,current_week,"m")
+f_hme_1week_ago=getFollowersBySexe (current_clean_followups,current_week-1,"m")
+f_hme_2weeks_ago=getFollowersBySexe (current_clean_followups,current_week-2,"m")
+f_hme_3weeks_ago=getFollowersBySexe (current_clean_followups,current_week-3,"m")
+f_hme_4weeks_ago=getFollowersBySexe (current_clean_followups,current_week-4,"m")
+
+f_hme_weekly=rbind(f_hme_4weeks_ago,f_hme_3weeks_ago,f_hme_2weeks_ago,f_hme_1week_ago,f_hme_current_week)
+setDT(f_hme_weekly, keep.rownames = "semaine") #Convertir le rownames en premiere colonne
+f_hme_weekly=f_hme_weekly%>%
+  mutate(legende="Masculin")
+
+
+f_fme_current_week=getFollowersBySexe (current_clean_followups,current_week,"f")
+f_fme_1week_ago=getFollowersBySexe (current_clean_followups,current_week-1,"f")
+f_fme_2weeks_ago=getFollowersBySexe (current_clean_followups,current_week-2,"f")
+f_fme_3weeks_ago=getFollowersBySexe (current_clean_followups,current_week-3,"f")
+f_fme_4weeks_ago=getFollowersBySexe (current_clean_followups,current_week-4,"f")
+
+f_fme_weekly=rbind(f_fme_4weeks_ago,f_fme_3weeks_ago,f_fme_2weeks_ago,f_fme_1week_ago,f_fme_current_week)
+setDT(f_fme_weekly, keep.rownames = "semaine") #Convertir le rownames en premiere colonne
+f_fme_weekly=f_fme_weekly%>%
+  mutate(legende="Feminin")
+
+  
+f_seen_by_sexe__weekly=rbind(f_hme_weekly,f_fme_weekly)  
+p=ggplot(data = f_seen_by_sexe__weekly,aes(x=semaine,y=n,group=legende,colour=legende))+geom_line()+geom_point()
+p=p+theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon le sexe", subtitle = )
+p
+
+```
+
+
+Column {data-width=308}
+-----------------------------------------------------------------------
+### Guéris par tranche d'age
+
+```{r}
+
+g=ggplot(current_clean_contacts, aes(x=age_class, color=age_class,fill=age_class))
+g=g+geom_bar(width = 1)+theme_classic()+labs(x="Trache d'age",y="Valeurs", title = "Les gueris par tranche d'age", subtitle = )
+g=g+scale_fill_brewer(palette="Set3")
+g
+
+```
+
+### occupation
+
+```{r}
+
+#Creation du df qui contient les categories avec nombre d'occurrences
+g_cas_by_occupations=current_clean_cases %>%
+  group_by(occupation) %>%
+  count() %>%
+ mutate(nombre=n) %>%
+  select(occupation,nombre) %>%
+  rename("Occupation"=occupation, "Nombre"=nombre) %>%
+    kable("html", caption = "<b><i>Repartition des gueris par occupation</i></b>") %>%
+  kable_classic() %>%
+    kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  row_spec(row = 0, bold = TRUE, color = "black")
+g_cas_by_occupations 
+
+
+```
+
+INDICATEURS AXE 1 : SUIVI CLINIQUE {data-icon="fa-chart-line"}
+==============================================================
+
+Column {data-width=75}
+-----------------------------------------------------------------------
+
+### Suivis générés, 21 derniers jours
+```{r total_countries2, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 21 derniers jours
+```{r total_followups_seen_with_signs_last30days2, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 21 derniers jours
+```{r total_followups_seen_no_signs_last30days2, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivi aujourd'hui
+```{r total_survivors_followed_today2, echo = FALSE}
+
+valueBox(total_survivors_followed_today, color = "#71CA97")  
+
+```
+
+Column {data-width=463}
+-----------------------------------------------------------------------
+### SC-1
+```{r}
+
+survirvors_health_problem=current_clean_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() 
+  
+prop_survirvors_health_problem=round((survirvors_health_problem/1142)*100,1) 
+
+prop_survirvors_health_problem=as.data.frame(prop_survirvors_health_problem)
+rownames(prop_survirvors_health_problem)=c("Proportion de gueris malade physique au cours du mois")
+setDT(prop_survirvors_health_problem, keep.rownames = "Designation")
+
+prop_survirvors_health_problem=prop_survirvors_health_problem %>%
+  select(Designation,n) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>GUERIS MALADES (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+prop_survirvors_health_problem
+
+`````
+
+### SC-2
+
+Column {data-width=462}
+-----------------------------------------------------------------------
+### SC-3
+
+### SC-4
+
+INDICATEURS AXE 2 : SUIVI BIOLOGIQUE {data-icon="fa-chart-line"}
+===============================================================
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+### SB-1
+```{r}
+
+analysis_prep <- here::here("preparation/analysis_functions.R")
+source(analysis_prep)
+
+
+#men_tested_sperme==getSpermeGenExpertResultCurrentMonth(current_clean_followups,NULL)
+men_tested_sperme=current_clean_followups %>%
+  filter(sperme=="test_gp") %>%
+  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+  distinct(person_id) %>%
+  count()
+men_tested_sperme=as.data.frame(men_tested_sperme)
+rownames(men_tested_sperme)=c("Nombre d'hommes ayant passé le test de sperme")
+
+men_tested_sperme_positive=getSpermeGenExpertResultCurrentMonth(current_clean_followups,"positif")
+men_tested_sperme_positive=as.data.frame(men_tested_sperme_positive)
+rownames(men_tested_sperme_positive)=c("Nombre d'hommes testés positifs")
+
+men_tested_sperme_negative=getSpermeGenExpertResultCurrentMonth(current_clean_followups,"negatif")
+men_tested_sperme_negative=as.data.frame(men_tested_sperme_negative)
+rownames(men_tested_sperme_negative)=c("Nombre d'hommes testés negatifs")
+
+tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)%>%
+  rename("Nombre"=n)
+
+
+#Convertir le rownames en premiere colonne
+setDT(tab_sperme, keep.rownames = "Designation")
+tab_sperme=tab_sperme %>%
+  select(Designation,Nombre) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>TEST SPERME (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+  #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
+  # row_spec(row = 0, bold = TRUE, color = "black")
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+tab_sperme
+
+
+`````
+
+### SB-2
+```{r}
+
+
+`````
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### SB-3
+
+
+### SB-4
+
+
+INDICATEURS AXE 3 : SUIVI PSYCHOSOCIAL {data-icon="fa-chart-line"}
+==================================================================
+
+
+
+ADMINISTRATION {data-icon="fa-globe"} 
+=====================================================
