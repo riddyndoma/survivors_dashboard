@@ -14,6 +14,7 @@ guess_dates <- function(x, error_tolerance = 1,
                         origin = as.Date("1900-01-01"), ...) {
 
   x <- as.character(x)
+  x<- str_replace(x,"T00:00:00.000Z","")
 
   to_replace <- !is.na(suppressWarnings(as.integer(x)))
   replacement <- lubridate::as_date(
@@ -22,5 +23,5 @@ guess_dates <- function(x, error_tolerance = 1,
   replacement <- as.character(replacement)
   x[to_replace] <- replacement
 
-  linelist::guess_dates(x, error_tolerance = error_tolerance, ...)
+  linelist::guess_dates(x, error_tolerance = error_tolerance, last_date = today()+45)
 }
