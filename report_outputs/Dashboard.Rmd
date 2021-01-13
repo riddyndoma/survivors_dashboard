@@ -252,7 +252,7 @@ colnames(tab1_values)=c("Nombre")
 setDT(tab1_values, keep.rownames = "Designation")
 show_tab1=tab1_values %>%
   select(Designation,Nombre) %>%
-  kable("html",caption = "<b><i><div style='background-color: #95d8fa;font-size: 100%;'>Indicateurs définitifs </div></b></i>", col.names = NULL) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>Indicateurs définitifs</p></div>", col.names = NULL) %>%
   kable_classic() %>%
   #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
   # row_spec(row = 0, bold = TRUE, color = "black")
@@ -276,7 +276,7 @@ colnames(taux_suivi_mensuel)=c("Pourcentage")
 setDT(taux_suivi_mensuel, keep.rownames = "Designation") #Convertir le rownames en premiere colonne
 show_tab2=taux_suivi_mensuel %>%
   select(Designation,Pourcentage) %>%
-  kable("html", caption = "<b><i>\n\n\n\n\n\n<div style='background-color: #cdedfc;font-size: 100%;'>Indicateurs du mois encours</div></b></i>", col.names = NULL) %>%
+  kable("html", caption = "\n\n\n<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>Indicateurs du mois encours</p></div>", col.names = NULL) %>%
   kable_classic() %>%
   #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
   # row_spec(row = 0, bold = TRUE, color = "black")
@@ -306,8 +306,61 @@ g
 Column {data-width=29%}
 -----------------------------------------------------------------------
 
+### Gueris suivis par semaine, selon le sexe
+
+```{r survivors-followed-weekly}
+
+men_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"m")
+men_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"m")
+# men_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"m")
+# men_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"m")
+
+men_followed_weekly=rbind(men_followed_current_week,men_followed_1week_ago)
+setDT(men_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+men_followed_weekly=men_followed_weekly%>%
+  mutate(sexe="Homme")
+#---------
+women_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"f")
+women_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"f")
+# women_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"f")
+# women_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"f")
+
+women_followed_weekly=rbind(women_followed_current_week,women_followed_1week_ago)
+setDT(women_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+women_followed_weekly=women_followed_weekly%>%
+  mutate(sexe="Femme")
+#-----------
+
+people_seen_weekly=rbind(men_followed_weekly,women_followed_weekly)
+
+# colour <- c("#5F9EA0", "#E1B378")
+colour <- c("#58A8E0","#ed6b90")
+
+fig <- ggplot2::ggplot(data = people_seen_weekly)+geom_line(aes(x=semaine,y=n,colour = sexe, group=sexe),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon le sexe", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+fig
+
+```
 
 
+### Taux
+```{r map}
+library(plotly)
+
+fig <- plot_ly(
+    domain = list(x = c(0, 1), y = c(0, 1)),
+    value = taux_suivi_mensuel$Pourcentage,
+    title = list(text = "Taux de suivi mensuel"),
+    type = "indicator",
+    mode = "gauge+number") 
+fig <- fig %>%
+  layout(margin = list(l=30,r=40))
+
+fig
+
+```
 
 
 
