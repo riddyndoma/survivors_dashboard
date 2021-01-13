@@ -32,7 +32,8 @@ required_packages <- c(
   "jsonlite",
   "sqldf",
   "gganimate",
-  "nonmemica"
+  "nonmemica",
+  "palettetown" #Package color
 
 )
 
