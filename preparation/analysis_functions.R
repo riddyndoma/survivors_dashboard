@@ -28,7 +28,7 @@ getFollowersByWeeks <- function(df,week_val,elem) {
 
 ##########################GET FOLLOWERS BY WEEKS, BY SEXE ########################################
 
-getFollowersBySexe <- function(df,week_val,elem) {
+getFollowersBySex <- function(df,week_val,elem) {
   answer=NULL
   if (elem=="m") {
     answer=df %>%
@@ -46,6 +46,8 @@ getFollowersBySexe <- function(df,week_val,elem) {
   rownames(answer)=c(paste0("Sem-",week_val)) #Renommage ligne pour porter numero de semaine
   return(answer)
 }
+
+
 
 ######################GET SURVIVORS BY SEX########################################################
 
