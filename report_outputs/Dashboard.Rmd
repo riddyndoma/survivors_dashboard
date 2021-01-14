@@ -66,6 +66,7 @@ current_clean_locations <- rio::import(current_clean_locations) %>%
 
 
 ```{r period-definition, include=FALSE}
+
 current_date=today()
 yesterday=current_date-1
 current_week=week(current_date)
@@ -199,7 +200,7 @@ g
 
 ```
 
-### Occupation
+### Repartition par sexe
 
 ```{r repartition-by-sex}
 
@@ -212,9 +213,9 @@ survivors_na_sexe=getSurvivorsBySex(current_clean_contacts,"") %>%
 survivors_men_and_women=rbind(survivors_women,survivors_men,survivors_na_sexe)
 
 g=ggplot(data=survivors_men_and_women, aes(x=sexe, y=n, fill=sexe,stat="identity")) +
-  scale_fill_brewer(palette="Cavalcanti") +
   geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "Repartition des guéris suivant le sexe", subtitle = )
 g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Quilava', spread = 6)
 g
 
 ```
@@ -276,6 +277,7 @@ colnames(taux_suivi_mensuel)=c("Pourcentage")
 setDT(taux_suivi_mensuel, keep.rownames = "Designation") #Convertir le rownames en premiere colonne
 show_tab2=taux_suivi_mensuel %>%
   select(Designation,Pourcentage) %>%
+  mutate(Pourcentage=paste0(Pourcentage," %")) %>% #Add % to the value
   kable("html", caption = "\n\n\n<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>Indicateurs du mois encours</p></div>", col.names = NULL) %>%
   kable_classic() %>%
   #   kable_styling(bootstrap_options = c("striped", "hover")) %>%
@@ -365,6 +367,147 @@ fig
 
 
 
+INDICATEURS SUIVI CLINIQUE ET BIOLOGIQUE {data-icon="fa-notes-medical"}
+======================================================================
+Column {data-width=5%}
+-----------------------------------------------------------------------
+
+### Suivis générés, 30 derniers jours
+```{r total_countries-clin, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 30 derniers jours
+```{r total_followups_seen_with_signs_last30days-clin, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 30 derniers jours
+```{r total_followups_seen_no_signs_last30days-clin, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday-clin, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+### Guéris suivi aujourd'hui
+```{r total_survivors_followed_today-clin, echo = FALSE}
+
+valueBox(total_survivors_followed_today, color = "#71CA97")  
+
+```
+
+### Guéris attendus au courant de ce mois
+```{r survivors-expected-current-month-clin, echo = FALSE}
+
+valueBox(survivors_expected_monthly, color = "#58A8E0")  
+
+```
+
+
+Column {data-width=31%}
+-----------------------------------------------------------------------
+### C1
+
+```{r}
+number_sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() 
+  
+prop_sick_people_current_month=round((number_sick_people_current_month/survivors_expected_monthly)*100,1) 
+
+prop_sick_people_current_month=as.data.frame(prop_sick_people_current_month)
+rownames(prop_sick_people_current_month)=c("Proportion de gueris malade physique au cours du mois")
+setDT(prop_sick_people_current_month, keep.rownames = "Designation")
+
+prop_sick_people_current_month=prop_sick_people_current_month %>%
+  select(Designation,n) %>%
+  mutate(n=paste0(n," %")) %>% #Add % to the value
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>GUERIS MALADES (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+prop_sick_people_current_month
+
+```
+
+
+### C2
 
 
 
+
+
+Column {data-width=35%}
+-----------------------------------------------------------------------
+### C3
+
+```{r survivors-status}
+
+sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(Legende="Avec probleme de santé")
+
+notsick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu sans signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+  count() %>%
+mutate(Legende="Sans probleme")
+
+people_current_month=dfw_30days_followups %>%
+      filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+mutate(Legende="Guéris reçus")
+
+tb_comp=rbind(people_current_month,sick_people_current_month,notsick_people_current_month)
+
+g=ggplot(data=tb_comp, aes(x=reorder(Legende, -n), y=n, fill=Legende,stat="identity")) +
+  geom_bar(stat="identity")+theme_classic(base_size = 14) +labs(x="",y="Effectifs", title = "Situation sanitaire des Guéris reçus (mois encours)", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Croconaw', spread = 6)
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+g
+
+
+
+```
+
+
+### C4
+
+
+
+Column {data-width=29%}
+-----------------------------------------------------------------------
+### C5
+
+
+
+### C6
+
+
+
+
+
+INDICATEURS SUIVI PSYCHOLOGIQUE {data-icon="fa-tired"}
+======================================================================
