@@ -32,7 +32,7 @@ clean_folder <- here::here("data", "clean")
 current_clean_cases <- get_latest_data("^cases.*.rds", clean_folder)
 current_clean_contacts <- get_latest_data("^contacts.*.rds", clean_folder)
 current_clean_followups <- get_latest_data("^followups.*.rds", clean_folder)
-#current_clean_locations <- get_latest_data("^location*.rds", clean_folder)
+current_clean_locations <- get_latest_data("^location*.rds", clean_folder)
 
 current_clean_cases
 current_clean_cases <- rio::import(current_clean_cases) %>%
@@ -44,6 +44,10 @@ current_clean_contacts <- rio::import(current_clean_contacts) %>%
 
 current_clean_followups
 current_clean_followups <- rio::import(current_clean_followups) %>%
+  as_tibble()
+
+current_clean_locations
+current_clean_locations <- rio::import(current_clean_locations) %>%
   as_tibble()
 
 
