@@ -4,6 +4,8 @@ library(tidyr)
 library(rio)
 library(linelist)
 
+options(max.print=1000000)
+
 # check to see which of these are actually needed, take out those that are not.
 path_to_functions <- here::here("functions")
 scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
@@ -32,6 +34,23 @@ teams <- teams %>%
 users <- users %>%
   as_tibble()
 
+#########################MAKE COPY#################################################
+
+copy_followups <- followups
+copy_cases <- cases
+copy_contacts <- contacts
+copy_relationships <- relationships
+copy_teams <- teams
+copy_users <- users
+
+#-----Data recovery---------
+# followups <- copy_followups
+# cases <- copy_cases
+# contacts <- copy_contacts
+# relationships <- copy_relationships
+# teams <- copy_teams
+# users <- copy_users
+
 #################### UNNEST TIBBLES ############################################
 
 #Cases data, under follow up, active, not deleted, also unnest all nested fields
@@ -50,10 +69,10 @@ unnested_cases <- cases %>%
     keep_empty = TRUE, names_sep = "_")
 
 
-#Follow up data, under follow up, active, not deleted, also unnest all nested fields
-followups=AddingColumns(followups,followups_base_columns)#Adding some important columns
+followups_base_checked=AddingColumns(followups,followups_base_columns) #Adding some important columns who can missed
 
-unnested_followups <- followups %>%
+#Follow up data, under follow up, active, not deleted, also unnest all nested fields
+unnested_followups <- followups_base_checked %>%
   filter(deleted == FALSE) %>%
   filter(contact.active == TRUE) %>%
   unnest(c(
@@ -170,28 +189,29 @@ unnested_followups <- followups %>%
     questionnaireAnswers.souvenirs_repetitifs_de_situations_liees_a_ebola,
     questionnaireAnswers.reves_repetitifs_lies_a_ebola,
     questionnaireAnswers.abus_dalcool_ou_de_substance,
-    questionnaireAnswers.vous_sentez_vous_stigmatise_par_la_communaute,
+    # questionnaireAnswers.vous_sentez_vous_stigmatise_par_la_communaute,
     questionnaireAnswers.evenement_traumatique,
     questionnaireAnswers.symptomatologie_actuelle,
-    questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
+    # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
-    questionnaireAnswers.var1_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var2_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var3_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var4_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var5_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var6_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var7_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var9_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var10_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var13_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var20_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var25_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var26_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var27_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var28_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    questionnaireAnswers.var29_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante
+    questionnaireAnswers.socia_structure_de_sante
+    # questionnaireAnswers.var1_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var2_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var3_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var4_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var5_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var6_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var7_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var9_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var10_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var13_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var20_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var25_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var26_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var27_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var28_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
+    # questionnaireAnswers.var29_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante
     ),
 
     keep_empty = TRUE, names_sep = "_")
@@ -470,6 +490,23 @@ cleaned_followups <- clean_data(cleaned_followups,
                               clean_data = FALSE,
                               guess_dates = FALSE)
 
+
+#cleaned_followups=AddingColumns(cleaned_followups,followups_base_clean_columns)#Check to add missed columns
+########################Correcting columns added manually##########################################################
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_lait_matenel_questionnaireanswers_lait_matenel")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_genex_date_questionnaireanswers_genex_date")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gen_gp_questionnaireanswers_gen_gp")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gen_np_questionnaireanswers_gen_np")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_exa_biochimie_questionnaireanswers_exa_biochimie")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_hematologie_questionnaireanswers_hematologie")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_urine_questionnaireanswers_urine")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_sperme_questionnaireanswers_sperme")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_questionnaireanswers_gene_date")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_resultat_questionnaireanswers_gene_resultat")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_cmd_np_questionnaireanswers_cmd_np")
+######################################################################################################################
+
+
 cleaned_followups <- cleaned_followups %>%
   mutate(date_of_followup = guess_dates(date),
          date_of_data_entry = guess_dates(createdat),
@@ -514,7 +551,6 @@ cleaned_followups <- cleaned_followups %>%
     contact_gender =="lng_reference_data_category_gender_female" ~ "Femme",
     contact_gender =="lng_reference_data_category_gender_male" ~ "Homme"
   )) %>%
-
   select(uuid = id_followups,
          person_id = personid,
          location_id = address_locationid,
@@ -530,7 +566,7 @@ cleaned_followups <- cleaned_followups %>%
          updated_at = updatedat,
          date_suvi_evaluation_clinique,
          date_resultat_labo_suivi_clinique,
-         vih_suivi_clinique=questionnaireanswers_test_vih,
+         test_vih_labo=questionnaireanswers_test_vih,
          tdr_suivi_cliniaue=questionnaireanswers_tdr_palu,
          grossesse_suivi_clinique=questionnaireanswers_grossesse,
          lait_maternel=questionnaireanswers_lait_matenel_value,
@@ -544,7 +580,8 @@ cleaned_followups <- cleaned_followups %>%
          resultat_serologie_ebola=questionnaireanswers_sero_resultat,
          nom_laboratoire=questionnaireanswers_name_laboratoire,
          date_suivi_psychologique,
-         structure_suivi_psychologique=questionnaireanswers_socia_structure_de_sante,
+         structure_suivi_psychologique=questionnaireanswers_socia_structure_de_sante_value,
+         refere_pour_soins_psycho=questionnaireanswers_refere_pour_des_soins_appropries_value,
          follow_up_number = index,
          team_id = teamid)
 
