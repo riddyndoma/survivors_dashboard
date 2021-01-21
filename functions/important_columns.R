@@ -11,15 +11,25 @@ followups_base_columns <- c(
   'questionnaireAnswers.gene_date',
   'questionnaireAnswers.gene_resultat',
   'questionnaireAnswers.cmd_np',
-  'questionnaireAnswers.var5_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante',
+  #'questionnaireAnswers.var5_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante',
   'questionnaireAnswers.test_vih',
   'questionnaireAnswers.tdr_palu',
   'questionnaireAnswers.grossesse',
-  'questionnaireAnswers.lait_matenel_value',
-  'questionnaireAnswers.genex_date_value',
-  'questionnaireAnswers.gen_gp_value',
-  'questionnaireAnswers.gen_np_value'
+  'questionnaireAnswers.refere_pour_des_soins_appropries'
 )
+
+
+# followups_base_clean_columns <- c(
+#   'questionnaireanswers_lait_matenel_value',
+#   'questionnaireanswers_genex_date_value',
+#   'questionnaireanswers_gen_gp_value',
+#   'questionnaireanswers_gen_np_value',
+#   'questionnaireanswers_sperme_value',
+#   'questionnaireanswers_gene_date_value',
+#   'questionnaireanswers_gene_resulta_value',
+#   'questionnaireanswers_cmd_np_value',
+#   'questionnaireAnswers_refere_pour_des_soins_appropries_value'
+# )
 
 ######################################################################
 #Add missed columns in the tibble
@@ -28,4 +38,17 @@ AddingColumns <- function(data, cname) {
   
   if(length(add)!=0) data[add] <- NA
   data
+}
+
+#Check and correct columns for artificial columns added
+correctingColumns <- function(data,c){
+  #data=as_tibble(data)
+  nc <- str_split(c,"_questionnaire")
+  nc <- nc[[1]][1]
+  nc <- paste0(nc,"_value")
+  
+  if(c %in% colnames(data)){
+    names(data)[names(data) == c] <- nc
+  }
+  return(data)
 }
