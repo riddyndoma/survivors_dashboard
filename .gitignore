@@ -39,4 +39,5 @@ vignettes/*.pdf
 .Renviron
 
 # Ingore all Data folder
-/data
+/data/clean/*rds
+/data/clean/*csv
