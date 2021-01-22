@@ -33,6 +33,7 @@ required_packages <- c(
   "sqldf",
   "gganimate",
   "nonmemica",
+  "linelist",
   #Package color
   "palettetown" 
 
