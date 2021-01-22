@@ -19,6 +19,7 @@ required_packages <- c(
   "magrittr",
   "kableExtra",
   "ggrepel",
+  "knitr",
   #"ggplot2",
   #"tidyverse",
   "plotly",
@@ -26,7 +27,7 @@ required_packages <- c(
   "formattable",
   #"tidyr",
   "aweek",
-  #"stringr",
+  "stringr",
   "httr",
   #"tibble",
   "jsonlite",
@@ -34,6 +35,7 @@ required_packages <- c(
   "gganimate",
   "nonmemica",
   "linelist",
+  "flexdashboard",
   #Package color
   "palettetown" 
 
