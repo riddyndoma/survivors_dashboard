@@ -41,3 +41,4 @@ vignettes/*.pdf
 # Ingore all Data folder
 /data/clean/*rds
 /data/clean/*csv
+/report_outputs/*html
