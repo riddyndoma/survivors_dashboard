@@ -15,7 +15,12 @@ followups_base_columns <- c(
   'questionnaireAnswers.test_vih',
   'questionnaireAnswers.tdr_palu',
   'questionnaireAnswers.grossesse',
-  'questionnaireAnswers.refere_pour_des_soins_appropries'
+  'questionnaireAnswers.refere_pour_des_soins_appropries',
+  'questionnaireAnswers.le_geuris_est_il_refere',
+  'questionnaireAnswers.cest_une_consultation_medicale_durgence',
+  'questionnaireAnswers.le_gueris_a_t_il_beneficie_dun_coseil_depistage_vih',
+  'questionnaireAnswers.le_gueris_a_t_il_accepte_de_se_faire_teste',
+  'questionnaireAnswers.le_gueris_presente_t_il_des_troubles_psychologiques'
 )
 
 

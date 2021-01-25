@@ -582,6 +582,11 @@ cleaned_followups <- cleaned_followups %>%
          date_suivi_psychologique,
          structure_suivi_psychologique=questionnaireanswers_socia_structure_de_sante_value,
          refere_pour_soins_psycho=questionnaireanswers_refere_pour_des_soins_appropries_value,
+         refere_suivi_clin=questionnaireanswers_le_geuris_est_il_refere,
+         consultation_urgence_suivi_clin=questionnaireanswers_cest_une_consultation_medicale_durgence,
+         conseil_depistage_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_beneficie_dun_coseil_depistage_vih,
+         acceptance_test_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_accepte_de_se_faire_teste,
+         trouble_psycho=questionnaireanswers_le_gueris_presente_t_il_des_troubles_psychologiques,
          follow_up_number = index,
          team_id = teamid)
 

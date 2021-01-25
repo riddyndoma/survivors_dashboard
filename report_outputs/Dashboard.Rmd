@@ -420,7 +420,7 @@ valueBox(survivors_expected_monthly, color = "#58A8E0")
 
 Column {data-width=31%}
 -----------------------------------------------------------------------
-### C1
+### Clinique
 
 ```{r sperme-exam}
 
@@ -431,14 +431,40 @@ number_sick_people_current_month=dfw_30days_followups %>%
       count()
   
 prop_sick_people_current_month=round((number_sick_people_current_month/survivors_expected_monthly)*100,1) 
-
-
 prop_sick_people_current_month=as.data.frame(prop_sick_people_current_month)
 rownames(prop_sick_people_current_month)=c("Proportion de gueris malade physique au cours du mois")
 setDT(prop_sick_people_current_month, keep.rownames = "Designation")
 
+#-------------------------------------------------------------------------------
+number_referred_sick_physically_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(refere_suivi_clin=="OUI") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
 
-prop_sick_people_current_month=prop_sick_people_current_month %>%
+prop_referred_sick_physically_current_month=round((number_referred_sick_physically_current_month/number_sick_people_current_month)*100,1)
+prop_referred_sick_physically_current_month=as.data.frame(prop_referred_sick_physically_current_month)
+rownames(prop_referred_sick_physically_current_month)=c("Proportion de guéris malade physique référés pour des soins spécialisés")
+setDT(prop_referred_sick_physically_current_month, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+
+number_urgents_consultation_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(consultation_urgence_suivi_clin=="OUI") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+number_urgents_consultation_current_month=as.data.frame(number_urgents_consultation_current_month)
+rownames(number_urgents_consultation_current_month)=c("Le nombre de consultations d'urgence réalisées")
+setDT(number_urgents_consultation_current_month, keep.rownames = "Designation")
+
+#---------------------------------TAB SICK--------------------------------------
+tab_sick_prop=rbind(prop_sick_people_current_month,prop_referred_sick_physically_current_month,number_urgents_consultation_current_month)
+
+tab_sick_prop=tab_sick_prop %>%
   select(Designation,n) %>%
   mutate(n=paste0(n," %")) %>% #Add % to the value
   kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>GUERIS MALADES (Mois encours)</p></div>",
@@ -446,38 +472,7 @@ prop_sick_people_current_month=prop_sick_people_current_month %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
-prop_sick_people_current_month
-
-#---------------------Sperme Exam ----------------------------------------------------
-men_tested_sperme=dfw_30days_followups %>%
-  filter(sperme=="test_gp") %>%
-  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-  distinct(person_id) %>%
-  count()
-men_tested_sperme=as.data.frame(men_tested_sperme)
-rownames(men_tested_sperme)=c("Nombre d'hommes ayant passé le test de sperme")
-
-men_tested_sperme_positive=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"positif")
-men_tested_sperme_positive=as.data.frame(men_tested_sperme_positive)
-rownames(men_tested_sperme_positive)=c("Nombre d'hommes testés positifs")
-
-men_tested_sperme_negative=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"negatif")
-men_tested_sperme_negative=as.data.frame(men_tested_sperme_negative)
-rownames(men_tested_sperme_negative)=c("Nombre d'hommes testés negatifs")
-
-tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)%>%
-  rename("Nombre"=n)
-
-#Convert rownames to first column
-setDT(tab_sperme, keep.rownames = "Designation")
-tab_sperme=tab_sperme %>%
-  select(Designation,Nombre) %>%
-  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>EXAMEN SPERME(Mois encours)</p></div>",
-        col.names = NULL) %>%
-  kable_classic() %>%
- kable_styling(bootstrap_options = c("striped", "hover"))
- 
-tab_sperme
+tab_sick_prop
 
 
 ```
@@ -542,11 +537,17 @@ number_followed_current_month=dfw_30days_followups %>%
       distinct(person_id) %>%
       count()
 
-prop_tested_vih_current_month=round((number_tested_vih_current_month/number_followed_current_month)*100,1)
+survivors_agreed_toBe_tested_vih=dfw_30days_followups %>%
+      filter(acceptance_test_vih_suivi_clin=="OUI" ) %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
 
-prop_tested_vih_current_month=as.data.frame(prop_tested_vih_current_month)
-rownames(prop_tested_vih_current_month)=c("Proportion de guéris ayant accepté le dépistage du VIH")
-setDT(prop_tested_vih_current_month, keep.rownames = "Designation")
+prop_agreed_tested_vih_current_month=round((survivors_agreed_toBe_tested_vih/number_followed_current_month)*100,1)
+
+prop_agreed_tested_vih_current_month=as.data.frame(prop_agreed_tested_vih_current_month)
+rownames(prop_agreed_tested_vih_current_month)=c("Proportion de guéris ayant accepté le dépistage du VIH")
+setDT(prop_agreed_tested_vih_current_month, keep.rownames = "Designation")
 
 #-------------------------------------------------------------------------------
 
@@ -564,7 +565,7 @@ rownames(prop_vih_positive)=c("Proportion de guéris ayant été dépisté posit
 setDT(prop_vih_positive, keep.rownames = "Designation")
 
 #-------------------------------------------------------------------------------
-vih=rbind(prop_tested_vih_current_month,prop_vih_positive)
+vih=rbind(prop_agreed_tested_vih_current_month,prop_vih_positive)
 vih=vih %>%
   select(Designation,n) %>%
   mutate(n=paste0(n," %")) %>% #Add % to the value
@@ -586,6 +587,41 @@ Column {data-width=29%}
 -----------------------------------------------------------------------
 ### C5
 
+```{r}
+
+#---------------------TAB Sperme Exam ------------------------------------------
+men_tested_sperme=dfw_30days_followups %>%
+  filter(sperme=="test_gp") %>%
+  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+  distinct(person_id) %>%
+  count()
+men_tested_sperme=as.data.frame(men_tested_sperme)
+rownames(men_tested_sperme)=c("Nombre d'hommes ayant passé le test de sperme")
+
+men_tested_sperme_positive=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"positif")
+men_tested_sperme_positive=as.data.frame(men_tested_sperme_positive)
+rownames(men_tested_sperme_positive)=c("Nombre d'hommes testés positifs")
+
+men_tested_sperme_negative=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"negatif")
+men_tested_sperme_negative=as.data.frame(men_tested_sperme_negative)
+rownames(men_tested_sperme_negative)=c("Nombre d'hommes testés negatifs")
+
+tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)%>%
+  rename("Nombre"=n)
+
+#Convert rownames to first column
+setDT(tab_sperme, keep.rownames = "Designation")
+tab_sperme=tab_sperme %>%
+  select(Designation,Nombre) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>EXAMEN SPERME(Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+tab_sperme
+
+
+```
 
 
 ### C6
