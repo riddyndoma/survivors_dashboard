@@ -353,11 +353,10 @@ women_followed_weekly=rbind(women_followed_current_week,women_followed_1week_ago
 setDT(women_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 women_followed_weekly=women_followed_weekly%>%
   mutate(sexe="Femme")
-#-----------
+#------------------------------------------------------------------------
 
 people_seen_weekly=rbind(men_followed_weekly,women_followed_weekly)
 
-# colour <- c("#5F9EA0", "#E1B378")
 colour <- c("#58A8E0","#ed6b90")
 
 fig <- ggplot2::ggplot(data = people_seen_weekly)+geom_line(aes(x=semaine,y=n,colour = sexe, group=sexe),size=1)
@@ -471,7 +470,6 @@ tab_sick_prop=tab_sick_prop %>%
         col.names = NULL) %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
- 
 tab_sick_prop
 
 
@@ -521,7 +519,6 @@ vih_positive_current_month=dfw_30days_followups %>%
 
 prop_vih_positive=round((vih_positive_current_month/number_tested_vih_current_month)*100,1)
 
-
 prop_vih_positive=as.data.frame(prop_vih_positive)
 rownames(prop_vih_positive)=c("Proportion de guéris ayant été dépisté positif au VIH")
 setDT(prop_vih_positive, keep.rownames = "Designation")
@@ -537,8 +534,6 @@ vih=vih %>%
 vih
 
 ```
-
-
 
 
 ### C4
@@ -591,7 +586,6 @@ tab_sperme
 
 
 
-
 INDICATEURS SUIVI PSYCHOLOGIQUE {data-icon="fa-tired"}
 ======================================================================
 Column {data-width=31%}
@@ -622,7 +616,9 @@ prop_psychologically_followed_current_month <- round((number_psychologically_fol
 prop_psychologically_followed_current_month=as.data.frame(prop_psychologically_followed_current_month)
 rownames(prop_psychologically_followed_current_month)=c("Proportion des guéris ayant réalisé le suivi psychologique")
 setDT(prop_psychologically_followed_current_month, keep.rownames = "Designation")
-#-------------------------Mental patients --------------------------------------------
+
+#-------------------------Mental patients --------------------------------------
+
 Number_mental_patients = dfw_30days_followups %>%
   filter(refere_pour_soins_psycho=="oui" | refere_pour_soins_psycho=="non" ) %>%
   filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
@@ -635,7 +631,7 @@ prop_mental_patients=as.data.frame(prop_mental_patients)
 rownames(prop_mental_patients)=c("Proportion de guéris malade mental  au cours du mois")
 setDT(prop_mental_patients, keep.rownames = "Designation")
 
-#----------------------------Refered---------------------------------------------------
+#----------------------------Refered--------------------------------------------
 
 number_psycho_refered_current_month = dfw_30days_followups %>%
   filter(refere_pour_soins_psycho=="oui") %>%
@@ -650,11 +646,23 @@ prop_psycho_refered_current_month=as.data.frame(prop_psycho_refered_current_mont
 rownames(prop_psycho_refered_current_month)=c("Proportion de guéris malade mental référés pour des soins spécialisés")
 setDT(prop_psycho_refered_current_month, keep.rownames = "Designation")
 
+#-------------------------Patients advised for HIV--------------------------------------
 
+number_patients_advised_for_HIV = dfw_30days_followups %>%
+  filter(conseil_depistage_vih_suivi_clin=="oui") %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_patients_advised_for_HIV=round((number_patients_advised_for_HIV/number_followed_current_month)*100,1)
+prop_patients_advised_for_HIV=as.data.frame(prop_patients_advised_for_HIV)
+rownames(prop_patients_advised_for_HIV)=c("Proportion de guéris conseillés pour le dépistage du VIH")
+setDT(prop_patients_advised_for_HIV, keep.rownames = "Designation")
 
 #-------------------------------------------------------------------------------
 
-df_psycho=rbind(prop_psychologically_followed_current_month,prop_psycho_refered_current_month,prop_mental_patients)
+df_psycho=rbind(prop_psychologically_followed_current_month,prop_psycho_refered_current_month,prop_mental_patients,prop_patients_advised_for_HIV)
 
 df_psycho=df_psycho %>%
   select(Designation,n) %>%
@@ -665,10 +673,6 @@ df_psycho=df_psycho %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
 df_psycho
-
-
-
-
 
 
 ```
