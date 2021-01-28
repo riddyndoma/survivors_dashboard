@@ -196,37 +196,24 @@ g
 
 ```
 
-### Situation sanitaire des guéris (mois encours)
+### Comparaison des gueris attendus et suivis(mois encours)
 
-```{r survivors-health-status}
+```{r survivors-excepted-received}
 
-sick_people_current_month=dfw_30days_followups %>%
-      filter(status=="Vu avec signe") %>%
-      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-      distinct(person_id) %>%
-      count() %>%
-  mutate(Legende="Avec probleme de santé")
-
-notsick_people_current_month=dfw_30days_followups %>%
-      filter(status=="Vu sans signe") %>%
-      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-      distinct(person_id) %>%
-  count() %>%
-mutate(Legende="Sans probleme")
-
-people_current_month=dfw_30days_followups %>%
+people_received_current_month=dfw_30days_followups %>%
       filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
       filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
       distinct(person_id) %>%
       count() %>%
-mutate(Legende="Guéris reçus")
+mutate(Legende="Guéris suivis")
 
 df_survivors_expected_monthly=data.frame("n"=survivors_expected_monthly, Legende="Guéris attendus")
 
-tb_comp=rbind(df_survivors_expected_monthly,people_current_month,sick_people_current_month,notsick_people_current_month)
+tb_comp=rbind(df_survivors_expected_monthly,people_received_current_month)
 
 g=ggplot(data=tb_comp, aes(x=reorder(Legende, -n), y=n, fill=Legende,stat="identity")) +
-  geom_bar(stat="identity")+theme_classic(base_size = 14) +labs(x="",y="Effectifs", title = "", subtitle = )
+  # geom_bar(stat="identity")+theme_classic(base_size = 14) +labs(x="",y="Effectifs", title = "", subtitle = )
+geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
 g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
 g=g+scale_fill_poke(pokemon = 'Croconaw', spread = 6)
 #g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
@@ -402,17 +389,16 @@ valueBox(total_survivors_followed_yesterday, color = "#ed6b90")
 
 ```
 
-### Guéris suivi aujourd'hui
-```{r already_received_so_far_current_month-clin, echo = FALSE}
-
-valueBox(already_received_so_far_current_month, color = "#71CA97")  
-
-```
-
 ### Guéris attendus au courant de ce mois
 ```{r survivors-expected-current-month-clin, echo = FALSE}
 
 valueBox(survivors_expected_monthly, color = "#58A8E0")  
+
+```
+
+### Guéris déjà reçus jusque là
+```{r already_received_so_far_current_month-clin, echo = FALSE}
+valueBox(already_received_so_far_current_month, color = "#71CA97")  
 
 ```
 
@@ -476,7 +462,36 @@ tab_sick_prop
 ```
 
 
-### C2
+### Répartition des guéris suivis, vu avec  signe et vu sans signe(mois encours)
+
+```{r survivors-health-status}
+
+sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="avec probleme de santé")
+
+notsick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu sans signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+  count() %>%
+mutate(situation="sans probleme")
+
+tb_comp_hs=rbind(sick_people_current_month,notsick_people_current_month)
+
+g=ggplot(data=tb_comp_hs, aes(x=reorder(situation, -n), y=n, fill=situation,stat="identity")) +
+  # geom_bar(stat="identity")+theme_classic(base_size = 12) +labs(x="",y="Effectifs", title = "", subtitle = )
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Cyndaquil', spread = 6)
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+g
+
+```
 
 
 Column {data-width=35%}
@@ -588,8 +603,56 @@ tab_sperme
 
 INDICATEURS SUIVI PSYCHOLOGIQUE {data-icon="fa-tired"}
 ======================================================================
-Column {data-width=31%}
+Column {data-width=5%}
 -----------------------------------------------------------------------
+### Suivis générés, 30 derniers jours
+```{r total_countries-psycho, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 30 derniers jours
+```{r total_followups_seen_with_signs_last30days-psycho, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 30 derniers jours
+```{r total_followups_seen_no_signs_last30days-psycho, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday-psycho, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+### Guéris attendus au courant de ce mois
+```{r survivors-expected-current-month-psycho, echo = FALSE}
+
+valueBox(survivors_expected_monthly, color = "#58A8E0")  
+
+```
+
+### Guéris déjà reçus jusque là
+```{r already_received_so_far_current_month-psycho, echo = FALSE}
+valueBox(already_received_so_far_current_month, color = "#71CA97")  
+
+```
+
+
+Column {data-width=26%}
+-----------------------------------------------------------------------
+### Psycho - 1
+```{r psycho-1}
+
+```
 
 
 Column {data-width=32%}
@@ -680,3 +743,11 @@ df_psycho
 
 Column {data-width=31%}
 -----------------------------------------------------------------------
+### Psycho - 2
+```{r psycho-2}
+
+```
+
+
+
+
