@@ -21,6 +21,7 @@ library(lubridate)
 library(gganimate)
 library(palettetown)
 library(plotly)
+library(aweek)
 
 path_to_functions <- here::here("functions")
 scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
@@ -68,7 +69,8 @@ current_clean_locations <- rio::import(current_clean_locations) %>%
 
 current_date=today()
 yesterday=current_date-1
-current_week=week(current_date)
+# current_week=week(current_date)
+current_week=date2week(now(), numeric = TRUE)
 current_month <- formatDate <- format(Sys.Date(), "%Y-%m")
 previous_7days=current_date-7
 previous_30days=current_date-30
@@ -235,7 +237,7 @@ as.data.frame() #Methode rownames depreciated pour tibble
 rownames(gueris_18)=c("Total des guéris supérieur ou égal à 18 ans")
 
 gueris_5_17=current_clean_contacts %>%
-  filter(age >= 5 && age <= 17) %>%
+  filter(age >= 5 & age <= 17) %>%
   count()%>%
 as.data.frame()
 rownames(gueris_5_17)=c("Total des guéris 5 - 17 ans")
@@ -743,11 +745,52 @@ df_psycho
 
 Column {data-width=31%}
 -----------------------------------------------------------------------
-### Psycho - 2
+### Evolution psychologique du patient depuis la dernière visite(mois en cours)
+
 ```{r psycho-2}
+
+stable_people_current_month=dfw_30days_followups %>%
+      filter(evol_psycho_depuis_derniere_visite=="stable") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="stable")
+
+amelioration_people_current_month=dfw_30days_followups %>%
+      filter(evol_psycho_depuis_derniere_visite=="en amelioration") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="en amelioration")
+
+regression_people_current_month=dfw_30days_followups %>%
+      filter(evol_psycho_depuis_derniere_visite=="en regression") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="en regression")
+
+tb_evol_hs=rbind(stable_people_current_month,amelioration_people_current_month,regression_people_current_month)
+
+# bp<- ggplot(tb_evol_hs, aes(x="", y=n, fill=situation))+
+# geom_bar(width = 1, stat = "identity")
+# pie <- bp + coord_polar("y", start=0)
+# pie + scale_fill_brewer("Blues") + theme_minimal() +
+#   theme(axis.text.x=element_blank())+
+#   geom_text(aes(y = n/3 + c(0, cumsum(n)[-length(n)]), 
+#                 label = percent(n/100)), size=5)
+
+g=ggplot(data=tb_evol_hs, aes(x=reorder(situation, -n), y=n, fill=situation,stat="identity")) +
+  # geom_bar(stat="identity")+theme_classic(base_size = 12) +labs(x="",y="Effectifs", title = "", subtitle = )
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_brewer("Blues")
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank())
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
+g
 
 ```
 
-
+### Pyscho - 2
 
 

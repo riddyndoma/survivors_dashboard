@@ -194,7 +194,8 @@ unnested_followups <- followups_base_checked %>%
     questionnaireAnswers.symptomatologie_actuelle,
     # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
-    questionnaireAnswers.socia_structure_de_sante
+    questionnaireAnswers.socia_structure_de_sante,
+    questionnaireAnswers.evolution_psychologique_du_patient_depuis_la_derniere_visite
     # questionnaireAnswers.var1_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
     # questionnaireAnswers.var2_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
     # questionnaireAnswers.var3_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
@@ -504,6 +505,7 @@ cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_sper
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_questionnaireanswers_gene_date")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_resultat_questionnaireanswers_gene_resultat")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_cmd_np_questionnaireanswers_cmd_np")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite")
 ######################################################################################################################
 
 
@@ -587,6 +589,7 @@ cleaned_followups <- cleaned_followups %>%
          conseil_depistage_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_beneficie_dun_coseil_depistage_vih,
          acceptance_test_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_accepte_de_se_faire_teste,
          trouble_psycho=questionnaireanswers_le_gueris_presente_t_il_des_troubles_psychologiques,
+         evol_psycho_depuis_derniere_visite=questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite_value,
          follow_up_number = index,
          team_id = teamid)
 

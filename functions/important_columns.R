@@ -20,9 +20,9 @@ followups_base_columns <- c(
   'questionnaireAnswers.cest_une_consultation_medicale_durgence',
   'questionnaireAnswers.le_gueris_a_t_il_beneficie_dun_coseil_depistage_vih',
   'questionnaireAnswers.le_gueris_a_t_il_accepte_de_se_faire_teste',
-  'questionnaireAnswers.le_gueris_presente_t_il_des_troubles_psychologiques'
+  'questionnaireAnswers.le_gueris_presente_t_il_des_troubles_psychologiques',
+  'questionnaireAnswers.evolution_psychologique_du_patient_depuis_la_derniere_visite'
 )
-
 
 # followups_base_clean_columns <- c(
 #   'questionnaireanswers_lait_matenel_value',
