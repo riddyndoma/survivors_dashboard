@@ -35,11 +35,15 @@ getFollowersBySex <- function(df,week_val,elem) {
       filter(week(date_of_followup)==week_val & gender == "Homme" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
       count()
     
-  }else {
+  }else if(elem=="f") {
     answer=df %>%
       filter(week(date_of_followup)==week_val & gender == "Femme" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
       count()
     
+  } else {
+      answer=df %>%
+        filter(week(date_of_followup)==week_val & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+        count()
   }
   
   answer=as.data.frame(answer)
@@ -79,7 +83,7 @@ getSurvivorsBySex <- function(df,elem) {
 
 ##########################GET FOLLOWUPS RATE########################################
 getFollowersRateByWeeks <- function(df,val) {
-  current_week=week(database_date)
+  # current_week=week(database_date)
   answer=NULL
   num=NULL
   denom=NULL
@@ -113,7 +117,7 @@ getFollowersRateByWeeks <- function(df,val) {
 #############################GET SPERME GenExpert RESULTAT CURRENT MONTH ######################
 getSpermeGenExpertResultCurrentMonth <- function(df,val) {
   
-  current_month <- formatDate <- format(Sys.Date(), "%Y-%m")
+  #current_month <- formatDate <- format(Sys.Date(), "%Y-%m")
   answer = NULL
   if (is.null(val) ){ #Count all tested
     answer= df %>%
