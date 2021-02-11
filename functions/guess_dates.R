@@ -23,5 +23,5 @@ guess_dates <- function(x, error_tolerance = 1,
   replacement <- as.character(replacement)
   x[to_replace] <- replacement
 
-  linelist::guess_dates(x, error_tolerance = error_tolerance, last_date = today()+45)
+  linelist::guess_dates(x, error_tolerance = error_tolerance, last_date = today()+90)
 }

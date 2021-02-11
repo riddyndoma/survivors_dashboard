@@ -70,10 +70,10 @@ current_clean_locations <- rio::import(current_clean_locations) %>%
 current_date=today()
 yesterday=current_date-1
 # current_week=week(current_date)
-current_week=date2week(now(), numeric = TRUE)-1 #Modif
-current_month <- formatDate <- format(Sys.Date()-2, "%Y-%m") #Modif
+current_week=date2week(now(), numeric = TRUE) #Modif
+current_month <- formatDate <- format(Sys.Date(), "%Y-%m") #Modif
 previous_7days=current_date-7
-previous_30days=current_date-31 #Modif
+previous_30days=current_date-30 #Modif
 
 dfw_today_followups=current_clean_followups %>%
   filter(date_of_followup == current_date)

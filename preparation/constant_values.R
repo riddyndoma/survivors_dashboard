@@ -1,3 +1,4 @@
 #Number of survivors expected during the month
-
-survivors_expected_monthly=712
+# 712 for January
+# 153 for Febrary
+survivors_expected_monthly=173
