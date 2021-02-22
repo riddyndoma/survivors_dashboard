@@ -1,0 +1,723 @@
+---
+title: "PROJET Suivi des gueris - Tableau de bord - Date : "
+date: "`r format(Sys.time(), '%A %d %B %Y')`"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(htmlwidgets)
+library(flexdashboard)
+library(sqldf)
+library(formattable)
+library(kableExtra)
+require(dplyr)
+library(ggplot2)
+library(purrr)
+library(data.table)
+library(lubridate)
+library(gganimate)
+library(palettetown)
+library(plotly)
+library(aweek)
+
+path_to_functions <- here::here("functions")
+scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
+for (file in scripts_files) source(file, local = TRUE)
+
+```
+
+```{r analysis-functions}
+analysis_prep <- here::here("preparation/analysis_functions.R")
+source(analysis_prep)
+
+analysis_prep_const <- here::here("preparation/constant_values.R")
+source(analysis_prep_const)
+
+```
+
+```{r load-data, include=FALSE}
+
+clean_folder <- here::here("data", "clean")
+
+current_clean_cases <- get_latest_data("^cases.*.rds", clean_folder)
+current_clean_contacts <- get_latest_data("^contacts.*.rds", clean_folder)
+current_clean_followups <- get_latest_data("^followups.*.rds", clean_folder)
+current_clean_locations <- get_latest_data("^location.*.rds", clean_folder)
+
+current_clean_cases
+current_clean_cases <- rio::import(current_clean_cases) %>%
+  as_tibble()
+
+current_clean_contacts
+current_clean_contacts <- rio::import(current_clean_contacts) %>%
+  as_tibble()
+
+current_clean_followups
+current_clean_followups <- rio::import(current_clean_followups) %>%
+  as_tibble()
+
+current_clean_locations
+current_clean_locations <- rio::import(current_clean_locations) %>%
+  as_tibble()
+```
+
+
+```{r period-definition, include=FALSE}
+
+current_date=today()
+yesterday=current_date-1
+# current_week=week(current_date)
+current_week=date2week(now(), numeric = TRUE) #Modif
+current_month <- formatDate <- format(Sys.Date(), "%Y-%m") #Modif
+previous_7days=current_date-7
+previous_30days=current_date-30 #Modif
+
+dfw_today_followups=current_clean_followups %>%
+  filter(date_of_followup == current_date)
+
+dfw_yesterday_followups=current_clean_followups %>%
+  filter(date_of_followup == yesterday)
+
+dfw_7days_followups=current_clean_followups %>%
+  filter(date_of_followup >= previous_7days) 
+
+dfw_30days_followups=current_clean_followups %>%
+  filter(date_of_followup >= previous_30days) 
+
+dfw_current_month_followups <- current_clean_followups %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) 
+
+```
+
+
+```{r summary_counts, include = FALSE}
+
+total_active_contacts_reg <- current_clean_contacts %>%
+  count() 
+
+total_cases_reg <- current_clean_cases %>%
+  count()
+
+
+total_active_sup <- current_clean_contacts %>%
+  distinct(sup) %>%
+  count()
+
+total_followups_generated_last30days <- dfw_30days_followups %>%
+  count()
+
+total_followups_forms_completed_last30days <- dfw_30days_followups %>%
+  filter(performed == TRUE) %>%
+  distinct(person_id) %>%
+  count()
+
+total_followups_seen_with_signs_last30days <- dfw_30days_followups %>%
+  filter(status == "Vu avec signe") %>%
+  distinct(person_id) %>%
+  count()
+
+total_followups_seen_no_signs_last30days <- dfw_30days_followups %>%
+  filter(status == "Vu sans signe") %>%
+  distinct(person_id) %>%
+  count()
+
+total_survivors_followed_yesterday=dfw_yesterday_followups %>%
+  filter(status == "Vu avec signe" | status == "Vu sans signe") %>%
+  distinct(person_id) %>%
+  count()
+
+already_received_so_far_current_month=dfw_current_month_followups %>%
+  filter(status == "Vu avec signe" | status == "Vu sans signe") %>%
+  distinct(person_id) %>%
+  count()
+
+```
+
+
+INDICATEURS GENERAUX {data-icon="fa-chart-line"}
+=====================================================
+Column {data-width=5%}
+-----------------------------------------------------------------------
+
+### Suivis générés, 30 derniers jours
+```{r total_countries, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 30 derniers jours
+```{r total_followups_seen_with_signs_last30days, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 30 derniers jours
+```{r total_followups_seen_no_signs_last30days, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+### Guéris attendus au courant de ce mois
+```{r survivors-expected-current-month, echo = FALSE}
+
+valueBox(survivors_expected_monthly, color = "#58A8E0")  
+
+```
+
+### Guéris déjà reçus jusque là
+```{r already_received_so_far_current_month, echo = FALSE}
+valueBox(already_received_so_far_current_month, color = "#71CA97")  
+
+```
+
+
+
+Column {data-width=31%}
+-----------------------------------------------------------------------
+### Tranche d'age
+
+```{r repartition-by-classeage}
+
+g=ggplot(current_clean_contacts, aes(x=age_class, color=age_class,fill=age_class))
+g=g+geom_bar(width = 1)+theme_classic()+labs(x="Tranche d'âge",y="Effectifs", title = "Les gueris par tranche d'âge", subtitle = )
+g=g+scale_fill_poke(pokemon = 'Nidorina', spread = 10)
+g
+
+```
+
+### Comparaison des gueris attendus et suivis(mois encours)
+
+```{r survivors-excepted-received}
+
+people_received_current_month=dfw_30days_followups %>%
+      filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+mutate(Legende="Guéris suivis")
+
+df_survivors_expected_monthly=data.frame("n"=survivors_expected_monthly, Legende="Guéris attendus")
+
+tb_comp=rbind(df_survivors_expected_monthly,people_received_current_month)
+
+g=ggplot(data=tb_comp, aes(x=reorder(Legende, -n), y=n, fill=Legende,stat="identity")) +
+  # geom_bar(stat="identity")+theme_classic(base_size = 14) +labs(x="",y="Effectifs", title = "", subtitle = )
+geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Croconaw', spread = 6)
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(legend.background = element_rect(fill="#b2c8d6",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#141933"))
+g
+
+```
+
+
+Column {data-width=31%}
+-----------------------------------------------------------------------
+
+### Tab1
+```{r}
+gueris_18=current_clean_contacts %>%
+  filter(age >= 18) %>%
+  count() %>%
+as.data.frame() #Methode rownames depreciated pour tibble
+rownames(gueris_18)=c("Total des guéris supérieur ou égal à 18 ans")
+
+gueris_5_17=current_clean_contacts %>%
+  filter(age >= 5 & age <= 17) %>%
+  count()%>%
+as.data.frame()
+rownames(gueris_5_17)=c("Total des guéris 5 - 17 ans")
+
+gueris_m5=current_clean_contacts %>%
+  filter(age < 5) %>%
+  count()%>%
+as.data.frame()
+rownames(gueris_m5)=c("Total des guéris de moins de 5 ans")
+
+tab1_values=rbind(gueris_18, gueris_5_17,gueris_m5)
+colnames(tab1_values)=c("Nombre")
+
+#Convertir le rownames en premiere colonne
+setDT(tab1_values, keep.rownames = "Designation")
+show_tab1=tab1_values %>%
+  select(Designation,Nombre) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>Indicateurs définitifs</p></div>", col.names = NULL) %>%
+  kable_classic() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+show_tab1
+
+```
+
+### Repartition par sexe
+
+```{r repartition-by-sex}
+
+survivors_men=getSurvivorsBySex(current_clean_contacts,"m") %>%
+  mutate(sexe="Homme")
+survivors_women=getSurvivorsBySex(current_clean_contacts,"f") %>%
+  mutate(sexe="Femme")
+survivors_na_sexe=getSurvivorsBySex(current_clean_contacts,"") %>%
+  mutate(sexe="NA")
+survivors_men_and_women=rbind(survivors_women,survivors_men,survivors_na_sexe)
+
+g=ggplot(data=survivors_men_and_women, aes(x=sexe, y=n, fill=sexe,stat="identity")) +
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "Repartition des guéris suivant le sexe", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Quilava', spread = 6)
+g=g+theme(legend.background = element_rect(fill="#b2c8d6",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#141933"))
+g
+
+```
+
+### Taux de suivi mensuel
+```{r taux}
+
+f_current_month_recus = dfw_current_month_followups %>%
+  filter(status == "Vu avec signe"|status == "Vu sans signe") %>%
+  distinct(person_id) %>%
+  count()
+
+taux_suivi_mensuel=round((f_current_month_recus/survivors_expected_monthly)*100,1)
+rate <- taux_suivi_mensuel$n
+gauge(rate, min = 0, max = 100, symbol = '%', gaugeSectors(
+  success = c(80, 100), warning = c(40, 79), danger = c(0, 39)
+))
+
+```
+
+
+Column {data-width=33%}
+-----------------------------------------------------------------------
+
+### Repartition selon le niveau de qualification par sexe
+```{r repartition-qualification}
+
+
+g=ggplot(current_clean_contacts) +
+  aes(x = occupation, fill = gender) +
+  geom_bar() +
+  geom_text(aes(label = after_stat(count)), stat = "count", position = position_stack(.5)) +
+  xlab("Qualification") +
+  ylab("Effectifs") +
+  labs(fill = "Sexe")+theme_classic()
+g=g+coord_flip()
+g=g+theme(legend.background = element_rect(fill="#fff3e6",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#141933"))
+g
+
+```
+
+
+### Gueris suivis par semaine, selon le sexe
+
+```{r survivors-followed-weekly}
+
+men_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"m")
+men_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"m")
+men_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"m")
+men_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"m")
+
+men_followed_weekly=rbind(men_followed_current_week,men_followed_1week_ago,men_followed_2weeks_ago,men_followed_3weeks_ago)
+setDT(men_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+men_followed_weekly=men_followed_weekly%>%
+  mutate(sexe="Homme")
+#-----------------------------------------------------------------------
+women_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"f")
+women_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"f")
+women_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"f")
+women_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"f")
+
+women_followed_weekly=rbind(women_followed_current_week,women_followed_1week_ago,women_followed_2weeks_ago,women_followed_3weeks_ago)
+setDT(women_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+women_followed_weekly=women_followed_weekly%>%
+  mutate(sexe="Femme")
+#------------------------------------------------------------------------
+
+all_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"")
+all_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"")
+all_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"")
+all_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"")
+
+all_followed_weekly=rbind(all_followed_current_week,all_followed_1week_ago,all_followed_2weeks_ago,all_followed_3weeks_ago)
+setDT(all_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+all_followed_weekly=all_followed_weekly%>%
+  mutate(sexe="ensemble")
+
+#-----------------------------------------------------------------------
+
+people_seen_weekly=rbind(all_followed_weekly,men_followed_weekly,women_followed_weekly)
+
+# colour <- c("#58A8E0","#ed6b90","#06d6a0")
+colour <-c("#ec524b","#9ad3bc","#f5b461")
+
+fig <- ggplot2::ggplot(data = people_seen_weekly)+geom_line(aes(x=semaine,y=n,colour = sexe, group=sexe),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon le sexe", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+
+fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#222831"))
+fig
+
+```
+
+
+INDICATEURS CLINIQUES,BIOLOGIQUES ET PSYCHO {data-icon="fa-notes-medical"}
+======================================================================
+Column {data-width=5%}
+-----------------------------------------------------------------------
+
+### Suivis générés, 30 derniers jours
+```{r total_countries-clin, echo = FALSE}
+
+valueBox(total_followups_generated_last30days, color = "#004F8B")
+
+```
+
+### Guéris vus avec signe, 30 derniers jours
+```{r total_followups_seen_with_signs_last30days-clin, echo = FALSE}
+
+valueBox(total_followups_seen_with_signs_last30days, color = "#ff7f7f") 
+
+```
+
+### Guéris vus sans signe, 30 derniers jours
+```{r total_followups_seen_no_signs_last30days-clin, echo = FALSE}
+
+valueBox(total_followups_seen_no_signs_last30days, color = "#818181")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday-clin, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+### Guéris attendus au courant de ce mois
+```{r survivors-expected-current-month-clin, echo = FALSE}
+
+valueBox(survivors_expected_monthly, color = "#58A8E0")  
+
+```
+
+### Guéris déjà reçus jusque là
+```{r already_received_so_far_current_month-clin, echo = FALSE}
+valueBox(already_received_so_far_current_month, color = "#71CA97")  
+
+```
+
+
+Column {data-width=31%}
+-----------------------------------------------------------------------
+### Clinique
+
+```{r sperme-exam}
+
+number_sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+  
+prop_sick_people_current_month=round((number_sick_people_current_month/survivors_expected_monthly)*100,1) 
+prop_sick_people_current_month=as.data.frame(prop_sick_people_current_month)
+rownames(prop_sick_people_current_month)=c("Proportion de gueris malade physique au cours du mois")
+setDT(prop_sick_people_current_month, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+number_referred_sick_physically_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(refere_suivi_clin=="OUI") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+prop_referred_sick_physically_current_month=round((number_referred_sick_physically_current_month/number_sick_people_current_month)*100,1)
+prop_referred_sick_physically_current_month=as.data.frame(prop_referred_sick_physically_current_month)
+rownames(prop_referred_sick_physically_current_month)=c("Proportion de guéris malade physique référés pour des soins spécialisés")
+setDT(prop_referred_sick_physically_current_month, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+
+number_urgents_consultation_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(consultation_urgence_suivi_clin=="OUI") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+number_urgents_consultation_current_month=as.data.frame(number_urgents_consultation_current_month)
+rownames(number_urgents_consultation_current_month)=c("Le nombre de consultations d'urgence réalisées")
+setDT(number_urgents_consultation_current_month, keep.rownames = "Designation")
+
+#---------------------------------TAB SICK--------------------------------------
+tab_sick_prop=rbind(prop_sick_people_current_month,prop_referred_sick_physically_current_month,number_urgents_consultation_current_month)
+
+tab_sick_prop=tab_sick_prop %>%
+  select(Designation,n) %>%
+  mutate(n=paste0(n," %")) %>% #Add % to the value
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS CLINIQUES (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+tab_sick_prop
+
+
+```
+
+
+### Répartition des guéris suivis, par etat de santé (mois encours)
+
+```{r survivors-health-status}
+
+sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="avec probleme de santé")
+
+notsick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu sans signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+  count() %>%
+mutate(situation="sans probleme")
+
+tb_comp_hs=rbind(sick_people_current_month,notsick_people_current_month)
+
+g=ggplot(data=tb_comp_hs, aes(x=reorder(situation, -n), y=n, fill=situation,stat="identity")) +
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Tangela', spread = 3)
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(legend.background = element_rect(fill="#f6f5f5",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#0f3057"))
+g
+
+
+```
+
+
+Column {data-width=35%}
+-----------------------------------------------------------------------
+### Biologique
+
+```{r vih-data}
+
+number_tested_vih_current_month=dfw_30days_followups %>%
+      filter(test_vih_labo=="positif" | test_vih_labo=="negatif" | test_vih_labo=="indetermine" ) %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+number_followed_current_month=dfw_30days_followups %>%
+      filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+survivors_agreed_toBe_tested_vih=dfw_30days_followups %>%
+      filter(acceptance_test_vih_suivi_clin=="OUI" ) %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+prop_agreed_tested_vih_current_month=round((survivors_agreed_toBe_tested_vih/number_followed_current_month)*100,1)
+
+prop_agreed_tested_vih_current_month=as.data.frame(prop_agreed_tested_vih_current_month)
+rownames(prop_agreed_tested_vih_current_month)=c("Proportion de guéris ayant accepté le dépistage du VIH")
+setDT(prop_agreed_tested_vih_current_month, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+
+vih_positive_current_month=dfw_30days_followups %>%
+      filter(test_vih_labo=="positif") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+prop_vih_positive=round((vih_positive_current_month/number_tested_vih_current_month)*100,1)
+
+prop_vih_positive=as.data.frame(prop_vih_positive)
+rownames(prop_vih_positive)=c("Proportion de guéris ayant été dépisté positif au VIH")
+setDT(prop_vih_positive, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+vih=rbind(prop_agreed_tested_vih_current_month,prop_vih_positive)
+vih=vih %>%
+  select(Designation,n) %>%
+  mutate(n=paste0(n," %")) %>% #Add % to the value
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS BIOLOGIQUES (Mois encours)</p></div>",col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+vih
+
+
+#---------------------TAB Sperme Exam ------------------------------------------
+men_tested_sperme=dfw_30days_followups %>%
+  filter(sperme=="test_gp") %>%
+  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+  distinct(person_id) %>%
+  count()
+men_tested_sperme=as.data.frame(men_tested_sperme)
+rownames(men_tested_sperme)=c("Nombre d'hommes testés")
+
+men_tested_sperme_positive=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"positif")
+men_tested_sperme_positive=as.data.frame(men_tested_sperme_positive)
+rownames(men_tested_sperme_positive)=c("Nombre d'hommes testés positifs")
+
+men_tested_sperme_negative=getSpermeGenExpertResultCurrentMonth(dfw_30days_followups,"negatif")
+men_tested_sperme_negative=as.data.frame(men_tested_sperme_negative)
+rownames(men_tested_sperme_negative)=c("Nombre d'hommes testés negatifs")
+
+tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)%>%
+  rename("Nombre"=n)
+
+#Convert rownames to first column
+setDT(tab_sperme, keep.rownames = "Designation")
+tab_sperme=tab_sperme %>%
+  select(Designation,Nombre) %>%
+  kable("html",caption = NULL,
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+tab_sperme
+
+#-----------------------------TAB Jamais suivi---------------------------------
+# women_tested_lait_maternel=dfw_30days_followups %>%
+#   filter(lait_maternel=="genexpert ") %>%
+#   filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+#   distinct(person_id) %>%
+#   count()
+# women_tested_lait_maternel=as.data.frame(women_tested_lait_maternel)
+# rownames(women_tested_lait_maternel)=c("Nombre d'hommes testés")
+
+never_seen_bio=dfw_30days_followups %>%
+  filter(is.na(structure_suvi_bio) & is.na(date_suvi_bio))%>%
+  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+
+```
+
+
+### Psycho
+
+```{r survivors-in-psycho}
+
+number_followed_current_month=dfw_30days_followups %>%
+      filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count()
+
+number_psychologically_followed_current_month = dfw_30days_followups %>%
+  filter(!is.na(structure_suivi_psychologique) &
+           !is.null(structure_suivi_psychologique)) %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_psychologically_followed_current_month <- round((number_psychologically_followed_current_month/number_followed_current_month)*100,1)
+
+prop_psychologically_followed_current_month=as.data.frame(prop_psychologically_followed_current_month)
+rownames(prop_psychologically_followed_current_month)=c("Proportion des guéris ayant réalisé le suivi psychologique")
+setDT(prop_psychologically_followed_current_month, keep.rownames = "Designation")
+
+#-------------------------Mental patients --------------------------------------
+
+Number_mental_patients = dfw_30days_followups %>%
+  filter(refere_pour_soins_psycho=="oui" | refere_pour_soins_psycho=="non" ) %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_mental_patients=round((Number_mental_patients/number_followed_current_month)*100,1)
+prop_mental_patients=as.data.frame(prop_mental_patients)
+rownames(prop_mental_patients)=c("Proportion de guéris malade mental  au cours du mois")
+setDT(prop_mental_patients, keep.rownames = "Designation")
+
+#----------------------------Refered--------------------------------------------
+
+number_psycho_refered_current_month = dfw_30days_followups %>%
+  filter(refere_pour_soins_psycho=="oui") %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_psycho_refered_current_month=round((number_psycho_refered_current_month/Number_mental_patients)*100,1)
+
+prop_psycho_refered_current_month=as.data.frame(prop_psycho_refered_current_month)
+rownames(prop_psycho_refered_current_month)=c("Proportion de guéris malade mental référés pour des soins spécialisés")
+setDT(prop_psycho_refered_current_month, keep.rownames = "Designation")
+
+#-------------------------Patients advised for HIV--------------------------------------
+
+number_patients_advised_for_HIV = dfw_30days_followups %>%
+  filter(conseil_depistage_vih_suivi_clin=="oui") %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_patients_advised_for_HIV=round((number_patients_advised_for_HIV/number_followed_current_month)*100,1)
+prop_patients_advised_for_HIV=as.data.frame(prop_patients_advised_for_HIV)
+rownames(prop_patients_advised_for_HIV)=c("Proportion de guéris conseillés pour le dépistage du VIH")
+setDT(prop_patients_advised_for_HIV, keep.rownames = "Designation")
+
+#-------------------------------------------------------------------------------
+
+df_psycho=rbind(prop_psychologically_followed_current_month,prop_psycho_refered_current_month,prop_mental_patients,prop_patients_advised_for_HIV)
+
+df_psycho=df_psycho %>%
+  select(Designation,n) %>%
+  mutate(n=paste0(n," %")) %>% #Add % to the value
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>SUIVI PSYCHOLOGIQUE (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+df_psycho
+
+
+```
+
+
+Column {data-width=29%}
+-----------------------------------------------------------------------
+### C1
+
+
+### C2
+

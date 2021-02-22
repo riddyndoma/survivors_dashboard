@@ -195,23 +195,6 @@ unnested_followups <- followups_base_checked %>%
     # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
     questionnaireAnswers.socia_structure_de_sante
-    # questionnaireAnswers.var1_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var2_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var3_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var4_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var5_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var6_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var7_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var9_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var10_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var13_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var20_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var25_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var26_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var27_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var28_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante,
-    # questionnaireAnswers.var29_est_ce_un_probleme_que_vous_avez_eu_avant_ebola_sinon_completer_la_colonne_suivante
   ),
   
   keep_empty = TRUE, names_sep = "_")
@@ -504,6 +487,7 @@ cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_sper
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_questionnaireanswers_gene_date")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_resultat_questionnaireanswers_gene_resultat")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_cmd_np_questionnaireanswers_cmd_np")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_date_questionnaireanswers_gene_date")
 #cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite_questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite")
 
 ######################################################################################################################
@@ -514,9 +498,7 @@ cleaned_followups <- cleaned_followups %>%
          date_of_data_entry = guess_dates(createdat),
          date_suvi_evaluation_clinique =guess_dates(questionnaireanswers_date),
          questionnaireanswers_date_de_decharge=ifelse(!is.na(questionnaireanswers_date_de_decharge),guess_dates(questionnaireanswers_date_de_decharge),questionnaireanswers_date_de_decharge),
-         #questionnaireanswers_date_de_decharge=guess_dates(questionnaireanswers_date_de_decharge),
          questionnaireanswers_vardate_prochaine_visite=ifelse(!is.na(questionnaireanswers_vardate_prochaine_visite),guess_dates(questionnaireanswers_vardate_prochaine_visite),questionnaireanswers_vardate_prochaine_visite),
-         #questionnaireanswers_vardate_prochaine_visite=guess_dates(questionnaireanswers_vardate_prochaine_visite),
          date_resultat_labo_suivi_clinique = guess_dates(questionnaireanswers_test_date),
          date_suivi_psychologique=guess_dates(questionnaireanswers_socia_date)
   ) %>%
@@ -591,7 +573,8 @@ cleaned_followups <- cleaned_followups %>%
          conseil_depistage_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_beneficie_dun_coseil_depistage_vih,
          acceptance_test_vih_suivi_clin=questionnaireanswers_le_gueris_a_t_il_accepte_de_se_faire_teste,
          trouble_psycho=questionnaireanswers_le_gueris_presente_t_il_des_troubles_psychologiques,
-         #evol_psycho_depuis_derniere_visite=questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite_value,
+         structure_suvi_bio=questionnaireanswers_name_structure_de_sante,
+         date_suvi_bio=questionnaireanswers_test_date,
          evol_psycho_depuis_derniere_visite=questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite,
          follow_up_number = index,
          team_id = teamid)
