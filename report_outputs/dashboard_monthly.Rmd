@@ -383,7 +383,7 @@ fig
 ```
 
 
-INDICATEURS CLINIQUES,BIOLOGIQUES ET PSYCHO {data-icon="fa-notes-medical"}
+INDICATEURS CLINIQUES, BIOLOGIQUES ET PSYCHO {data-icon="fa-notes-medical"}
 ======================================================================
 Column {data-width=5%}
 -----------------------------------------------------------------------
