@@ -183,8 +183,6 @@ valueBox(already_received_so_far_current_month, color = "#71CA97")
 
 ```
 
-
-
 Column {data-width=31%}
 -----------------------------------------------------------------------
 ### Tranche d'age
@@ -429,10 +427,9 @@ valueBox(already_received_so_far_current_month, color = "#71CA97")
 
 ```
 
-
-Column {data-width=31%}
+Column {.tabset data-width=60%}
 -----------------------------------------------------------------------
-### Clinique
+### Indicateurs partie clinique
 
 ```{r sperme-exam}
 
@@ -488,45 +485,7 @@ tab_sick_prop
 
 ```
 
-
-### Répartition des guéris suivis, par etat de santé (mois encours)
-
-```{r survivors-health-status}
-
-sick_people_current_month=dfw_30days_followups %>%
-      filter(status=="Vu avec signe") %>%
-      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-      distinct(person_id) %>%
-      count() %>%
-  mutate(situation="avec probleme de santé")
-
-notsick_people_current_month=dfw_30days_followups %>%
-      filter(status=="Vu sans signe") %>%
-      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-      distinct(person_id) %>%
-  count() %>%
-mutate(situation="sans probleme")
-
-tb_comp_hs=rbind(sick_people_current_month,notsick_people_current_month)
-
-g=ggplot(data=tb_comp_hs, aes(x=reorder(situation, -n), y=n, fill=situation,stat="identity")) +
-  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
-g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
-g=g+scale_fill_poke(pokemon = 'Tangela', spread = 3)
-#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
-g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
-g=g+theme(legend.background = element_rect(fill="#f6f5f5",
-                                  size=0.5, linetype="solid", 
-                                  colour ="#0f3057"))
-g
-
-
-```
-
-
-Column {data-width=35%}
------------------------------------------------------------------------
-### Biologique
+### Indicateurs partie biologique
 
 ```{r vih-data}
 
@@ -628,8 +587,7 @@ never_seen_bio=dfw_30days_followups %>%
 
 ```
 
-
-### Psycho
+### Indicateurs partie psychologique
 
 ```{r survivors-in-psycho}
 
@@ -713,10 +671,43 @@ df_psycho
 
 ```
 
-
-Column {data-width=29%}
+Column {data-width=35%}
 -----------------------------------------------------------------------
-### C1
+### Répartition des guéris suivis, par etat de santé (mois encours)
+
+```{r survivors-health-status, out.width = '80%'}
+
+sick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu avec signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+      count() %>%
+  mutate(situation="avec probleme de santé")
+
+notsick_people_current_month=dfw_30days_followups %>%
+      filter(status=="Vu sans signe") %>%
+      filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
+      distinct(person_id) %>%
+  count() %>%
+mutate(situation="sans probleme")
+
+tb_comp_hs=rbind(sick_people_current_month,notsick_people_current_month)
+
+g=ggplot(data=tb_comp_hs, aes(x=reorder(situation, -n), y=n, fill=situation,stat="identity")) +
+  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+# g=g+scale_fill_poke(pokemon = 'Tangela', spread = 3)
+g <- g + scale_fill_manual(values=c("#91091E","#8AC4D0","#999999", "#E69F00", "#56B4E9"))
+#g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank()) 
+g=g+theme(legend.background = element_rect(fill="#f6f5f5",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#0f3057"))
+g
+
+
+```
+
 
 
 ### C2
