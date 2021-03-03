@@ -577,7 +577,8 @@ cleaned_followups <- cleaned_followups %>%
          date_suvi_bio=questionnaireanswers_test_date,
          evol_psycho_depuis_derniere_visite=questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite,
          follow_up_number = index,
-         team_id = teamid)
+         team_id = teamid,
+         contact_id)
 
 #---------------LOCATIONS---------------------------------------------------------
 
