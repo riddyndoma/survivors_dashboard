@@ -1,6 +1,6 @@
 ---
-title: "PROJET Suivi des gueris - Tableau de bord - Date : "
-date: "`r format(Sys.time(), '%A %d %B %Y')`"
+title: "PROJET Suivi des guéris - Tableau de bord - Date : "
+date: "`r format(Sys.time(), '%d-%m-%Y')`"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -22,6 +22,8 @@ library(gganimate)
 library(palettetown)
 library(plotly)
 library(aweek)
+
+library(ggcharts) #RDN
 
 path_to_functions <- here::here("functions")
 scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
@@ -142,7 +144,7 @@ INDICATEURS GENERAUX {data-icon="fa-chart-line"}
 Column {data-width=5%}
 -----------------------------------------------------------------------
 
-### Suivis générés, 30 derniers jours
+### Données des guéris générées, 30 derniers jours
 ```{r total_countries, echo = FALSE}
 
 valueBox(total_followups_generated_last30days, color = "#004F8B")
@@ -163,13 +165,6 @@ valueBox(total_followups_seen_no_signs_last30days, color = "#818181")
 
 ```
 
-### Guéris suivis hier
-```{r total_survivors_followed_yesterday, echo = FALSE}
-
-valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
-
-```
-
 ### Guéris attendus au courant de ce mois
 ```{r survivors-expected-current-month, echo = FALSE}
 
@@ -177,22 +172,40 @@ valueBox(survivors_expected_monthly, color = "#58A8E0")
 
 ```
 
-### Guéris déjà reçus jusque là
+### Guéris reçus pour ce mois
 ```{r already_received_so_far_current_month, echo = FALSE}
-valueBox(already_received_so_far_current_month, color = "#71CA97")  
+valueBox( already_received_so_far_current_month , color = "#71CA97")  
 
 ```
 
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
+
+```
+
+
 Column {data-width=31%}
 -----------------------------------------------------------------------
-### Tranche d'age
+### pyramide des âges
 
 ```{r repartition-by-classeage}
 
-g=ggplot(current_clean_contacts, aes(x=age_class, color=age_class,fill=age_class))
-g=g+geom_bar(width = 1)+theme_classic()+labs(x="Tranche d'âge",y="Effectifs", title = "Les gueris par tranche d'âge", subtitle = )
-g=g+scale_fill_poke(pokemon = 'Nidorina', spread = 10)
-g
+# g=ggplot(current_clean_contacts, aes(x=age_class, color=age_class,fill=age_class))
+# g=g+geom_bar(width = 1)+theme_classic()+labs(x="Tranche d'âge",y="Effectifs", title = "Les gueris par tranche d'âge", subtitle = )
+# g=g+scale_fill_poke(pokemon = 'Nidorina', spread = 10)
+# g
+
+
+library(ggcharts)
+hc <- current_clean_contacts %>%
+  filter(gender=="Femme" | gender=="Homme") %>%
+  mutate(gender=tolower(gender)) %>%
+  group_by(gender,age_class) %>%
+  count() 
+
+pyramid_chart(hc, age_class, n, gender, xlab = "effectifs",title="", bar_colors = c("pink", "steelblue"))
 
 ```
 
@@ -229,7 +242,7 @@ g
 Column {data-width=31%}
 -----------------------------------------------------------------------
 
-### Tab1
+### Tableau indicateurs definitfs
 ```{r}
 gueris_18=current_clean_contacts %>%
   filter(age >= 18) %>%
@@ -263,26 +276,57 @@ show_tab1
 
 ```
 
-### Repartition par sexe
+### Repartition des guéris par sexe
 
-```{r repartition-by-sex}
+```{r repartition-by-sex, fig.height=5}
 
-survivors_men=getSurvivorsBySex(current_clean_contacts,"m") %>%
-  mutate(sexe="Homme")
-survivors_women=getSurvivorsBySex(current_clean_contacts,"f") %>%
-  mutate(sexe="Femme")
-survivors_na_sexe=getSurvivorsBySex(current_clean_contacts,"") %>%
-  mutate(sexe="NA")
-survivors_men_and_women=rbind(survivors_women,survivors_men,survivors_na_sexe)
+# survivors_men=getSurvivorsBySex(current_clean_contacts,"m") %>%
+#   mutate(sexe="Homme")
+# survivors_women=getSurvivorsBySex(current_clean_contacts,"f") %>%
+#   mutate(sexe="Femme")
+# survivors_na_sexe=getSurvivorsBySex(current_clean_contacts,"") %>%
+#   mutate(sexe="NA")
+# survivors_men_and_women=rbind(survivors_women,survivors_men,survivors_na_sexe)
+# 
+# g=ggplot(data=survivors_men_and_women, aes(x=sexe, y=n, fill=sexe,stat="identity")) +
+#   geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "Repartition des guéris suivant le sexe", subtitle = )
+# g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+# g=g+scale_fill_poke(pokemon = 'Quilava', spread = 6)
+# g=g+theme(legend.background = element_rect(fill="#b2c8d6",
+#                                   size=0.5, linetype="solid", 
+#                                   colour ="#141933"))
+# g
+# 
+# df_statut=current_cases_probables_confirmes  %>%
+#   count(outcome_id) %>%
+#   rename(statut=outcome_id)
+# 
+# df_statut <- na.omit(df_statut) #Remove all rows contents NA
+# df_statut <- df_statut %>%
+#   mutate(pro=round((n/sum(df_statut$n))*100,1))
 
-g=ggplot(data=survivors_men_and_women, aes(x=sexe, y=n, fill=sexe,stat="identity")) +
-  geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "Repartition des guéris suivant le sexe", subtitle = )
-g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
-g=g+scale_fill_poke(pokemon = 'Quilava', spread = 6)
-g=g+theme(legend.background = element_rect(fill="#b2c8d6",
-                                  size=0.5, linetype="solid", 
-                                  colour ="#141933"))
-g
+
+df<-current_clean_contacts %>%
+  group_by(gender) %>%
+  count()
+ df <- df %>%
+   mutate(pro=round((n/sum(df$n))*100,1))
+
+df <- na.omit(df) #Remove all rows contents NA
+
+# Create a basic bar
+pie = ggplot(df, aes(x="", n, fill=gender)) + geom_bar(stat="identity", width=1)
+pie = pie + coord_polar("y", start=0) + geom_text(aes(label = paste0((pro), "%")), position = position_stack(vjust = 0.5))
+pie = pie + scale_fill_manual(values=c("#fbeeac","#8ac4d0","#824427" ))
+# pie=pie+scale_fill_poke(pokemon = 'Quilava', spread = 6)
+pie = pie + labs(x = NULL, y = NULL, fill = NULL, title = "")
+# Tidy up the theme
+pie = pie + theme_classic() + theme(axis.line = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank(),
+          plot.title = element_text(hjust = 0.5, color = "#666666"))
+pie
+
 
 ```
 
@@ -306,7 +350,7 @@ gauge(rate, min = 0, max = 100, symbol = '%', gaugeSectors(
 Column {data-width=33%}
 -----------------------------------------------------------------------
 
-### Repartition selon le niveau de qualification par sexe
+### Répartitions par catégorie professionnelle et par sexe
 ```{r repartition-qualification}
 
 
@@ -386,7 +430,7 @@ INDICATEURS CLINIQUES, BIOLOGIQUES ET PSYCHO {data-icon="fa-notes-medical"}
 Column {data-width=5%}
 -----------------------------------------------------------------------
 
-### Suivis générés, 30 derniers jours
+### Données des guéris générées, 30 derniers jours
 ```{r total_countries-clin, echo = FALSE}
 
 valueBox(total_followups_generated_last30days, color = "#004F8B")
@@ -407,13 +451,6 @@ valueBox(total_followups_seen_no_signs_last30days, color = "#818181")
 
 ```
 
-### Guéris suivis hier
-```{r total_survivors_followed_yesterday-clin, echo = FALSE}
-
-valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
-
-```
-
 ### Guéris attendus au courant de ce mois
 ```{r survivors-expected-current-month-clin, echo = FALSE}
 
@@ -421,9 +458,16 @@ valueBox(survivors_expected_monthly, color = "#58A8E0")
 
 ```
 
-### Guéris déjà reçus jusque là
+### Guéris reçus pour ce mois
 ```{r already_received_so_far_current_month-clin, echo = FALSE}
 valueBox(already_received_so_far_current_month, color = "#71CA97")  
+
+```
+
+### Guéris suivis hier
+```{r total_survivors_followed_yesterday-clin, echo = FALSE}
+
+valueBox(total_survivors_followed_yesterday, color = "#ed6b90")  
 
 ```
 
@@ -673,7 +717,7 @@ df_psycho
 
 Column {data-width=35%}
 -----------------------------------------------------------------------
-### Répartition des guéris suivis, par etat de santé (mois encours)
+### Répartition des guéris réçus, par etat de santé (mois encours)
 
 ```{r survivors-health-status, out.width = '80%'}
 
@@ -711,4 +755,9 @@ g
 
 
 ### C2
+```{r}
+
+
+```
+
 
