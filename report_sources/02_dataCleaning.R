@@ -195,6 +195,7 @@ unnested_followups <- followups_base_checked %>%
     # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
     questionnaireAnswers.socia_structure_de_sante
+    # questionnaireAnswers.structure_de_sante
   ),
   
   keep_empty = TRUE, names_sep = "_")
@@ -555,6 +556,7 @@ cleaned_followups <- cleaned_followups %>%
          test_vih_labo=questionnaireanswers_test_vih,
          tdr_suivi_cliniaue=questionnaireanswers_tdr_palu,
          grossesse_suivi_clinique=questionnaireanswers_grossesse,
+         structure_suivi_clin=questionnaireanswers_structure_de_sante,
          lait_maternel=questionnaireanswers_lait_matenel_value,
          lait_maternel_genexpert_date=questionnaireanswers_genex_date_value,
          lait_maternel_genexpert_gp=questionnaireanswers_gen_gp_value,
