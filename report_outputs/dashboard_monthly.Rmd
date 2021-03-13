@@ -24,6 +24,7 @@ library(plotly)
 library(aweek)
 
 library(ggcharts) #RDN
+library(sjmisc)
 
 path_to_functions <- here::here("functions")
 scripts_files <- dir(path_to_functions, pattern = ".R$", full.names=TRUE)
@@ -522,17 +523,18 @@ tab_sick_prop=tab_sick_prop %>%
   select(Designation,n) %>%
   mutate(n=paste0(n," %")) #Add % to the value
   
-#Adding absolute value as new column
+#Adding absolute value as new column (Numerators)
   va <- c(number_sick_people_current_month$n,number_referred_sick_physically_current_month$n,number_urgents_consultation_current_month$n)
-  tab_sick_prop = cbind(tab_sick_prop,va)
+  denoms <- c(survivors_expected_monthly,number_sick_people_current_month,"")
+  tab_sick_prop = cbind(tab_sick_prop,va,denoms)
   tab_sick_prop[3,2] <- "" #Adding void in cell (3,2)
 #------------------------------------  
   
   tab_sick_prop=tab_sick_prop %>%
   kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS CLINIQUES (Mois encours)</p></div>",
-        col.names = NULL) %>%
+        col.names = c("","","N","D")) %>%
   kable_classic() %>%
- kable_styling(bootstrap_options = c("striped", "hover"))
+ kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 tab_sick_prop
 
 
@@ -551,13 +553,39 @@ clin_followed_current_month <- dfw_30days_followups %>%
 clin_followed_current_month <- clin_followed_current_month[clin_followed_current_month$structure_suivi_clin_value !="NULL", ] #Delete row NULL(without structure)
 clin_followed_current_month$structure_suivi_clin_value <- toupper(clin_followed_current_month$structure_suivi_clin_value)
 
-  clin_followed_current_month <- clin_followed_current_month%>%
+# Correction des noms en additionnant les valeurs
+# et création de nouveau tibble avec nouveaux noms
+# ------------------------------------------------
+mambasa=0
+butembo=0
+beni=0
+mangina=0
+i=0
+for (compt in clin_followed_current_month$structure_suivi_clin_value) {
+  i=i+1
+  if (str_contains(compt,"MAMBASA") | str_contains(compt,"MAMBA")  ) {
+    mambasa <- mambasa+clin_followed_current_month[i,2]
+  } else  if (str_contains(compt,"BUTEMBO") ) {
+    butembo <- butembo+clin_followed_current_month[i,2]
+  }
+  else  if (str_contains(compt,"BENI") ) {
+    beni <- beni+clin_followed_current_month[i,2]
+  }else  if (str_contains(compt,"MANGINA") | str_contains(compt,"MANG")  ) {
+    mangina <- mangina+clin_followed_current_month[i,2]
+  }
+}
+
+structure_suivi_clin_value <-c("CLINIQUE DE BENI","CLINIQUE DE BUTEMBO","CLINIQUE DE MAMBASA","CLINIQUE DE MANGINA")
+n <- c(beni,butembo,mambasa,mangina)
+
+new_clin_followed <- tibble(structure_suivi_clin_value,n) %>%
+
   kable("html",caption = "<br><br><div style='background-color:#1f441e;font-size: 100%;'><p style='color:white;font-weight: bold; font-style: italic'>Situation clinique par structure (Mois encours) - guéris reçus</p></div>",
         col.names = NULL) %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
-clin_followed_current_month
+new_clin_followed
 
 
 
@@ -611,21 +639,23 @@ vih=vih %>%
   select(Designation,n) %>%
   mutate(n=paste0(n," %"))  #Add % to the value
   
-  #Adding absolute value as new column
+  # Adding absolute value as new column (numerators)
   va <- c(survivors_agreed_toBe_tested_vih$n,vih_positive_current_month$n)
-  vih = cbind(vih,va)
+  denoms <- c(number_followed_current_month,number_tested_vih_current_month)
+  vih = cbind(vih,va,denoms)
   
-  # vih[2,2] <- gsub("NaN","") #Replace NaN for indefinite to void
+  # Replace NaN for indefinite to void
    vih[2,2] <- gsub(vih[2,2] ,"NaN","0 %") 
   
   vih <- vih %>%
-  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS BIOLOGIQUES (Mois encours)</p></div>",col.names = NULL) %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS BIOLOGIQUES (Mois encours)</p></div>",
+        col.names = c("","","N","D")) %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  vih
 
 
-#---------------------TAB Sperme Exam ------------------------------------------
+#---------------------SECOND TAB ------------------------------------------
 men_tested_sperme=dfw_30days_followups %>%
   filter(sperme=="test_gp") %>%
   filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
@@ -655,21 +685,6 @@ tab_sperme=tab_sperme %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
 tab_sperme
-
-#-----------------------------TAB Jamais suivi---------------------------------
-# women_tested_lait_maternel=dfw_30days_followups %>%
-#   filter(lait_maternel=="genexpert ") %>%
-#   filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-#   distinct(person_id) %>%
-#   count()
-# women_tested_lait_maternel=as.data.frame(women_tested_lait_maternel)
-# rownames(women_tested_lait_maternel)=c("Nombre d'hommes testés")
-
-never_seen_bio=dfw_30days_followups %>%
-  filter(is.na(structure_suvi_bio) & is.na(date_suvi_bio))%>%
-  filter(format(date_of_followup, "%Y-%m") ==current_month) %>%
-  distinct(person_id) %>%
-  count()
 
 
 ```
@@ -751,11 +766,12 @@ df_psycho=df_psycho %>%
   
 #Adding absolute value as new column
   va <- c(number_psychologically_followed_current_month$n,Number_mental_patients$n,number_psycho_refered_current_month$n,number_patients_advised_for_HIV$n)
-  df_psycho = cbind(df_psycho,va)
+  denoms <- c(number_followed_current_month,number_followed_current_month,Number_mental_patients,number_followed_current_month)
+  df_psycho = cbind(df_psycho,va,denoms)
 #----------------------------------- 
   df_psycho=df_psycho %>%
   kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>SUIVI PSYCHOLOGIQUE (Mois encours)</p></div>",
-        col.names = NULL) %>%
+        col.names = c("","","N","D")) %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
@@ -778,13 +794,39 @@ psycho_followed_current_month = dfw_30days_followups %>%
 psycho_followed_current_month <- psycho_followed_current_month[psycho_followed_current_month$structure_suivi_psychologique !="NULL", ] #Delete row NULL(without structure)
 psycho_followed_current_month$structure_suivi_psychologique=toupper(psycho_followed_current_month$structure_suivi_psychologique)
 
-  psycho_followed_current_month <- psycho_followed_current_month %>%
+#-------------------------------------------------
+# Correction des noms en additionnant les valeurs
+# et création de nouveau tibble avec nouveaux noms
+# ------------------------------------------------
+mambasa=0
+butembo=0
+beni=0
+mangina=0
+i=0
+for (compt in psycho_followed_current_month$structure_suivi_psychologique) {
+  i=i+1
+  if (str_contains(compt,"MAMBASA") | str_contains(compt,"MAMBA") ) {
+    mambasa <- mambasa+psycho_followed_current_month[i,2]
+  } else  if (str_contains(compt,"BUTEMBO") ) {
+    butembo <- butembo+psycho_followed_current_month[i,2]
+  }
+  else  if (str_contains(compt,"BENI") ) {
+    beni <- beni+psycho_followed_current_month[i,2]
+  }else  if (str_contains(compt,"MANGINA") | str_contains(compt,"MANG")  ) {
+    mangina <- mangina+psycho_followed_current_month[i,2]
+  }
+}
+
+structure_suivi_psychologique <-c("CLINIQUE DE BENI","CLINIQUE DE BUTEMBO","CLINIQUE DE MAMBASA","CLINIQUE DE MANGINA")
+n <- c(beni,butembo,mambasa,mangina)
+
+new_pycho_followed <- tibble(structure_suivi_psychologique,n) %>%
   kable("html",caption = "<br><br><div style='background-color:#1f441e;font-size: 100%;'><p style='color:white;font-weight: bold; font-style: italic'>Situation psycho par structure (Mois encours) - guéris reçus</p></div>",
         col.names = NULL) %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
  
-psycho_followed_current_month
+new_pycho_followed
 
 
 ```
