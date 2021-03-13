@@ -528,9 +528,17 @@ tab_sick_prop=tab_sick_prop %>%
   denoms <- c(survivors_expected_monthly,number_sick_people_current_month,"")
   tab_sick_prop = cbind(tab_sick_prop,va,denoms)
   tab_sick_prop[3,2] <- "" #Adding void in cell (3,2)
-#------------------------------------  
+#------------------------------------------------------
+
+
+  
+  
+  
   
   tab_sick_prop=tab_sick_prop %>%
+    add_row(Designation="Proportion des contre-reference reçus au site d'autre Patologies",n="0 %",va=0) %>% #Adding rows for indicators of no data untill now
+    add_row(Designation="Cout moyen de prise en charge des cas réferés",n="",va=0) %>%
+    replace(.=="NULL", "") %>%
   kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>INDICATEURS CLINIQUES (Mois encours)</p></div>",
         col.names = c("","","N","D")) %>%
   kable_classic() %>%
@@ -672,13 +680,24 @@ men_tested_sperme_negative=getSpermeGenExpertResultCurrentMonth(dfw_30days_follo
 men_tested_sperme_negative=as.data.frame(men_tested_sperme_negative)
 rownames(men_tested_sperme_negative)=c("Nombre d'hommes testés negatifs")
 
-tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)%>%
-  rename("Nombre"=n)
+tab_sperme=rbind(men_tested_sperme,men_tested_sperme_negative,men_tested_sperme_positive)
+  # rename(n=Nombre)
+setDT(tab_sperme, keep.rownames = "Designation")
+#Adding some indicators who have no data untill now
+tab_sperme <- tab_sperme %>%
+  add_row(Designation="Le nombre des femmes testées",n=0) %>%
+  add_row(Designation="Le nombre des femmes testées positives",n=0) %>%
+  add_row(Designation="# de tests positifs lors des accouchements chez les guéris (Lait Maternel, Annexes fœtales)",n=0) %>%
+  add_row(Designation="# de tests négatifs lors des accouchements chez les guéris (Lait Maternel, Annexes fœtales)",n=0)
+
+  
+
+
 
 #Convert rownames to first column
-setDT(tab_sperme, keep.rownames = "Designation")
+
 tab_sperme=tab_sperme %>%
-  select(Designation,Nombre) %>%
+  select(Designation,n) %>%
   kable("html",caption = NULL,
         col.names = NULL) %>%
   kable_classic() %>%
