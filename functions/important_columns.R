@@ -28,7 +28,11 @@ followups_base_columns <- c(
   'questionnaireAnswers.2_eqrossesse',
   'questionnaireAnswers.sero_resultat',
   'questionnaireAnswers.vardate_prochaine_visite',
-  'questionnaireAnswers.si_trouble_de_force_musculaire'
+  'questionnaireAnswers.si_trouble_de_force_musculaire',
+  'questionnaireAnswers.date_du_rendez_vous',
+  'questionnaireAnswers.nom_de_la_clinique',
+  'questionnaireAnswers.mas',
+  'questionnaireAnswers.mam'
 )
 
 # followups_base_clean_columns <- c(

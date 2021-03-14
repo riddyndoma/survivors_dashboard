@@ -726,7 +726,7 @@ number_psychologically_followed_current_month = dfw_30days_followups %>%
   distinct(person_id) %>%
   count()
 
-prop_psychologically_followed_current_month <- round((number_psychologically_followed_current_month/number_followed_current_month)*100,1)
+prop_psychologically_followed_current_month <- round((number_psychologically_followed_current_month/survivors_expected_monthly)*100,1)
 
 prop_psychologically_followed_current_month=as.data.frame(prop_psychologically_followed_current_month)
 rownames(prop_psychologically_followed_current_month)=c("Proportion des guéris ayant réalisé le suivi psychologique")
@@ -741,7 +741,7 @@ Number_mental_patients = dfw_30days_followups %>%
   distinct(person_id) %>%
   count()
 
-prop_mental_patients=round((Number_mental_patients/number_followed_current_month)*100,1)
+prop_mental_patients=round((Number_mental_patients/survivors_expected_monthly)*100,1)
 prop_mental_patients=as.data.frame(prop_mental_patients)
 rownames(prop_mental_patients)=c("Proportion de guéris malade mental  au cours du mois")
 setDT(prop_mental_patients, keep.rownames = "Designation")
@@ -770,7 +770,7 @@ number_patients_advised_for_HIV = dfw_30days_followups %>%
   distinct(person_id) %>%
   count()
 
-prop_patients_advised_for_HIV=round((number_patients_advised_for_HIV/number_followed_current_month)*100,1)
+prop_patients_advised_for_HIV=round((number_patients_advised_for_HIV/survivors_expected_monthly)*100,1)
 prop_patients_advised_for_HIV=as.data.frame(prop_patients_advised_for_HIV)
 rownames(prop_patients_advised_for_HIV)=c("Proportion de guéris conseillés pour le dépistage du VIH")
 setDT(prop_patients_advised_for_HIV, keep.rownames = "Designation")
@@ -785,7 +785,7 @@ df_psycho=df_psycho %>%
   
 #Adding absolute value as new column
   va <- c(number_psychologically_followed_current_month$n,Number_mental_patients$n,number_psycho_refered_current_month$n,number_patients_advised_for_HIV$n)
-  denoms <- c(number_followed_current_month,number_followed_current_month,Number_mental_patients,number_followed_current_month)
+  denoms <- c(survivors_expected_monthly,survivors_expected_monthly,Number_mental_patients,survivors_expected_monthly)
   df_psycho = cbind(df_psycho,va,denoms)
 #----------------------------------- 
   df_psycho=df_psycho %>%
@@ -849,6 +849,32 @@ new_pycho_followed
 
 
 ```
+### Indicateurs partie nutrition
+
+```{r nutrition}
+
+number_nutritions_followed_current_month = dfw_30days_followups %>%
+  filter(!is.na(nutrition_structure) &
+           !is.null(nutrition_structure)) %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  distinct(person_id) %>%
+  count()
+
+prop_nutrition_followed_current_month <- round((number_nutritions_followed_current_month/survivors_expected_monthly)*100,1)
+
+prop_nutrition_followed_current_month=as.data.frame(prop_nutrition_followed_current_month)
+rownames(prop_nutrition_followed_current_month)=c("Proportion des guéris ayant été à l'évaluation nutritionnelle")
+setDT(prop_nutrition_followed_current_month, keep.rownames = "Designation")
+
+prop_nutrition_followed_current_month  %>%
+  kable("html",caption = "<div style='background-color:#004F8B;font-size: 100%;'><p style='color:white;font-weight: bold;'>NUTRITION (Mois encours)</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
 
 Column {data-width=35%}
 -----------------------------------------------------------------------

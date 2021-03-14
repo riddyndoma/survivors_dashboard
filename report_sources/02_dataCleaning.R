@@ -4,7 +4,7 @@ library(tidyr)
 library(rio)
 library(linelist)
 
-options(max.print=1000000)
+options(max.print=9999999999)
 
 # check to see which of these are actually needed, take out those that are not.
 path_to_functions <- here::here("functions")
@@ -194,8 +194,12 @@ unnested_followups <- followups_base_checked %>%
     questionnaireAnswers.symptomatologie_actuelle,
     # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
-    questionnaireAnswers.socia_structure_de_sante
+    questionnaireAnswers.socia_structure_de_sante,
     # questionnaireAnswers.structure_de_sante
+    #Nutrition varaibles
+    questionnaireAnswers.nom_de_la_clinique,
+    questionnaireAnswers.mam,
+    questionnaireAnswers.mas
   ),
   
   keep_empty = TRUE, names_sep = "_")
@@ -490,7 +494,9 @@ cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_cmd_np_questionnaireanswers_cmd_np")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene_date_questionnaireanswers_gene_date")
 #cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite_questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite")
-
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_mam_questionnaireanswers_mam")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_mas_questionnaireanswers_mas")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_nom_de_la_clinique_questionnaireanswers_nom_de_la_clinique")
 ######################################################################################################################
 
 
@@ -580,7 +586,10 @@ cleaned_followups <- cleaned_followups %>%
          evol_psycho_depuis_derniere_visite=questionnaireanswers_evolution_psychologique_du_patient_depuis_la_derniere_visite,
          follow_up_number = index,
          team_id = teamid,
-         contact_id)
+         contact_id,
+         nutrition_man=questionnaireanswers_mam_value,
+         nutrition_mas=questionnaireanswers_mas_value,
+         nutrition_structure=questionnaireanswers_nom_de_la_clinique_value)
 
 #---------------LOCATIONS---------------------------------------------------------
 

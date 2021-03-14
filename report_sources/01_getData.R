@@ -41,7 +41,7 @@ print(access_token)
 # specify date ranges, for follow up filters - if your volume of follow up gets too large 
 #     see below commented out code in Follow Ups section for an example
     date_now <- format(Sys.time(), "%Y-%m-%dT23:59:59.999Z")
-    date_30d_ago <- format((Sys.Date() - 30), "%Y-%m-%dT23:59:59.999Z")
+    date_30d_ago <- format((Sys.Date() - 32), "%Y-%m-%dT23:59:59.999Z")
 ###################################################################################################
 
 ###################################################################################################
