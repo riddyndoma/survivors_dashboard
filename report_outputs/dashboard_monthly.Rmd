@@ -873,6 +873,55 @@ prop_nutrition_followed_current_month  %>%
   kable_classic() %>%
  kable_styling(bootstrap_options = c("striped", "hover"))
 
+#----------SECOND TAB----------------------------------------------------
+
+nutrition_followed_current_month = dfw_30days_followups %>%
+  filter(!is.na(nutrition_structure) &
+           !is.null(nutrition_structure)) %>%
+  filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
+  filter(format(date_of_followup, "%Y-%m") == current_month) %>%
+  group_by(nutrition_structure) %>%
+  distinct(person_id) %>%
+  count(nutrition_structure) 
+
+nutrition_followed_current_month <- nutrition_followed_current_month[nutrition_followed_current_month$nutrition_structure !="NULL", ] #Delete row NULL(without structure)
+nutrition_followed_current_month$nutrition_structure=toupper(nutrition_followed_current_month$nutrition_structure)
+
+#-------------------------------------------------
+# Correction des noms en additionnant les valeurs
+# et création de nouveau tibble avec nouveaux noms
+# ------------------------------------------------
+mambasa=0
+butembo=0
+beni=0
+mangina=0
+i=0
+for (compt in nutrition_followed_current_month$nutrition_structure) {
+  i=i+1
+  if (str_contains(compt,"MAMBASA") | str_contains(compt,"MAMBA") ) {
+    mambasa <- mambasa+nutrition_followed_current_month[i,2]
+  } else  if (str_contains(compt,"BUTEMBO") ) {
+    butembo <- butembo+nutrition_followed_current_month[i,2]
+  }
+  else  if (str_contains(compt,"BENI") ) {
+    beni <- beni+nutrition_followed_current_month[i,2]
+  }else  if (str_contains(compt,"MANGINA") | str_contains(compt,"MANG")  ) {
+    mangina <- mangina+nutrition_followed_current_month[i,2]
+  }
+}
+
+nutrition_structure <-c("CLINIQUE DE BENI","CLINIQUE DE BUTEMBO","CLINIQUE DE MAMBASA","CLINIQUE DE MANGINA")
+n <- c(beni,butembo,mambasa,mangina)
+
+new_nutrition_followed <- tibble(nutrition_structure,n) %>%
+  kable("html",caption = "<br><br><div style='background-color:#1f441e;font-size: 100%;'><p style='color:white;font-weight: bold; font-style: italic'>Evaluation nutritionnelle par structure (Mois encours) - guéris reçus</p></div>",
+        col.names = NULL) %>%
+  kable_classic() %>%
+ kable_styling(bootstrap_options = c("striped", "hover"))
+ 
+new_nutrition_followed
+
+
 ```
 
 
