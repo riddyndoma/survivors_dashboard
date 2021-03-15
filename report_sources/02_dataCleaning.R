@@ -4,7 +4,7 @@ library(tidyr)
 library(rio)
 library(linelist)
 
-options(max.print=9999999999)
+options(max.print=1000000)
 
 # check to see which of these are actually needed, take out those that are not.
 path_to_functions <- here::here("functions")
@@ -44,12 +44,12 @@ copy_teams <- teams
 copy_users <- users
 
 #-----Data recovery---------
-# followups <- copy_followups
-# cases <- copy_cases
-# contacts <- copy_contacts
-# relationships <- copy_relationships
-# teams <- copy_teams
-# users <- copy_users
+followups <- copy_followups
+cases <- copy_cases
+contacts <- copy_contacts
+relationships <- copy_relationships
+teams <- copy_teams
+users <- copy_users
 
 #################### UNNEST TIBBLES ############################################
 
@@ -195,7 +195,11 @@ unnested_followups <- followups_base_checked %>%
     # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
     questionnaireAnswers.socia_structure_de_sante,
-    # questionnaireAnswers.structure_de_sante
+    #Pycho vars new
+    questionnaireAnswers.var_tristesse_douleur_morale,
+    questionnaireAnswers.var4_retrait_social_isolement,
+    questionnaireAnswers.pensees_suicidaires,
+    questionnaireAnswers.fort_sentiment_de_culpabilite_honte,
     #Nutrition varaibles
     questionnaireAnswers.nom_de_la_clinique,
     questionnaireAnswers.mam,
@@ -497,6 +501,10 @@ cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_gene
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_mam_questionnaireanswers_mam")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_mas_questionnaireanswers_mas")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_nom_de_la_clinique_questionnaireanswers_nom_de_la_clinique")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_questionnaireAnswers.var_tristesse_douleur_morale_questionnaireanswers_questionnaireAnswers.var_tristesse_douleur_morale")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_var4_retrait_social_isolement_questionnaireanswers_var4_retrait_social_isolement")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_pensees_suicidaires_questionnaireanswers_pensees_suicidaires")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_fort_sentiment_de_culpabilite_honte_questionnaireanswers_fort_sentiment_de_culpabilite_honte")
 ######################################################################################################################
 
 
@@ -587,9 +595,13 @@ cleaned_followups <- cleaned_followups %>%
          follow_up_number = index,
          team_id = teamid,
          contact_id,
-         nutrition_man=questionnaireanswers_mam_value,
+         nutrition_mam=questionnaireanswers_mam_value,
          nutrition_mas=questionnaireanswers_mas_value,
-         nutrition_structure=questionnaireanswers_nom_de_la_clinique_value)
+         nutrition_structure=questionnaireanswers_nom_de_la_clinique_value,
+         pyscho_tristesse_douleur_morale=questionnaireanswers_var_tristesse_douleur_morale_value,
+         psycho_retrait_social_isolement=questionnaireanswers_var4_retrait_social_isolement_value,
+         psycho_pensees_suicidaires=questionnaireanswers_pensees_suicidaires_value,
+         psycho_fort_sentiment_de_culpabilite_honte=questionnaireanswers_fort_sentiment_de_culpabilite_honte_value)
 
 #---------------LOCATIONS---------------------------------------------------------
 

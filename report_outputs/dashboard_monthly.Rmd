@@ -373,14 +373,15 @@ g
 
 ### Gueris suivis par semaine, selon le sexe
 
-```{r survivors-followed-weekly}
+```{r survivors-followed-weekly, fig.height=3.5,fig.align='center'}
 
 men_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,"m")
 men_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"m")
 men_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"m")
 men_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"m")
+men_followed_4weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-4,"m")
 
-men_followed_weekly=rbind(men_followed_current_week,men_followed_1week_ago,men_followed_2weeks_ago,men_followed_3weeks_ago)
+men_followed_weekly=rbind(men_followed_current_week,men_followed_1week_ago,men_followed_2weeks_ago,men_followed_3weeks_ago,men_followed_4weeks_ago)
 setDT(men_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 men_followed_weekly=men_followed_weekly%>%
   mutate(sexe="Homme")
@@ -389,8 +390,9 @@ women_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,
 women_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"f")
 women_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"f")
 women_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"f")
+women_followed_4weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-4,"f")
 
-women_followed_weekly=rbind(women_followed_current_week,women_followed_1week_ago,women_followed_2weeks_ago,women_followed_3weeks_ago)
+women_followed_weekly=rbind(women_followed_current_week,women_followed_1week_ago,women_followed_2weeks_ago,women_followed_3weeks_ago,women_followed_4weeks_ago)
 setDT(women_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 women_followed_weekly=women_followed_weekly%>%
   mutate(sexe="Femme")
@@ -400,15 +402,17 @@ all_followed_current_week=getFollowersBySex(dfw_30days_followups,current_week,""
 all_followed_1week_ago=getFollowersBySex(dfw_30days_followups,current_week-1,"")
 all_followed_2weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-2,"")
 all_followed_3weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-3,"")
+all_followed_4weeks_ago=getFollowersBySex(dfw_30days_followups,current_week-4,"")
 
-all_followed_weekly=rbind(all_followed_current_week,all_followed_1week_ago,all_followed_2weeks_ago,all_followed_3weeks_ago)
+all_followed_weekly=rbind(all_followed_current_week,all_followed_1week_ago,all_followed_2weeks_ago,all_followed_3weeks_ago,all_followed_4weeks_ago)
 setDT(all_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 all_followed_weekly=all_followed_weekly%>%
   mutate(sexe="ensemble")
 
 #-----------------------------------------------------------------------
 
-people_seen_weekly=rbind(all_followed_weekly,men_followed_weekly,women_followed_weekly)
+people_seen_weekly=rbind(all_followed_weekly,men_followed_weekly,women_followed_weekly) %>%
+  arrange(semaine)
 
 # colour <- c("#58A8E0","#ed6b90","#06d6a0")
 colour <-c("#ec524b","#9ad3bc","#f5b461")
@@ -710,7 +714,8 @@ tab_sperme
 
 ### Indicateurs partie psychologique
 
-```{r survivors-in-psycho}
+#### -
+```{r survivors-in-psycho, fig.height=8}
 
 number_followed_current_month=dfw_30days_followups %>%
       filter(status == "Vu sans signe" | status == "Vu avec signe") %>%
@@ -848,7 +853,84 @@ new_pycho_followed <- tibble(structure_suivi_psychologique,n) %>%
 new_pycho_followed
 
 
+
 ```
+
+#### -
+```{r eval-psycho, fig.height=3.3,fig.width=9,fig.align='center'}
+#---------------------------Eval chart------------------------------------------
+tristesse_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"tris")
+tristesse_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"tris")
+tristesse_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"tris")
+tristesse_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"tris")
+tristesse_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"tris")
+
+tristesse_followed_weekly=rbind(tristesse_followed_current_week,tristesse_followed_1week_ago,tristesse_followed_2weeks_ago,tristesse_followed_3weeks_ago,tristesse_followed_4weeks_ago)
+setDT(tristesse_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+tristesse_followed_weekly=tristesse_followed_weekly%>%
+  mutate(eval="Tristesse, douleur morale")
+#-------------------------------------------------------------------------
+
+isolement_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"iso")
+isolement_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"iso")
+isolement_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"iso")
+isolement_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"iso")
+isolement_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"iso")
+
+isolement_followed_weekly=rbind(isolement_followed_current_week,isolement_followed_1week_ago,isolement_followed_2weeks_ago,isolement_followed_3weeks_ago,isolement_followed_4weeks_ago)
+setDT(isolement_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+isolement_followed_weekly=isolement_followed_weekly%>%
+  mutate(eval="Retrait social, isolement")
+#-----------------------------------------------------------------------
+
+suicide_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"suicid")
+suicide_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"suicid")
+suicide_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"suicid")
+suicide_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"suicid")
+suicide_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"suicid")
+
+suicide_followed_weekly=rbind(suicide_followed_current_week,suicide_followed_1week_ago,suicide_followed_2weeks_ago,suicide_followed_3weeks_ago,suicide_followed_4weeks_ago)
+setDT(suicide_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+suicide_followed_weekly=suicide_followed_weekly%>%
+  mutate(eval="Pensées suicidaires")
+#----------------------------------------------------------------------
+
+honte_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"honte")
+honte_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"honte")
+honte_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"honte")
+honte_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"honte")
+honte_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"honte")
+
+honte_followed_weekly=rbind(honte_followed_current_week,honte_followed_1week_ago,honte_followed_2weeks_ago,honte_followed_3weeks_ago,honte_followed_4weeks_ago)
+setDT(honte_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+honte_followed_weekly=honte_followed_weekly%>%
+  mutate(eval=" Fort sentiment de culpabilité/honte")
+#---------------------------------------------------------------------
+
+people_psycho_weekly=rbind(tristesse_followed_weekly,
+                           isolement_followed_weekly,
+                           suicide_followed_weekly,
+                           honte_followed_weekly) %>%
+  arrange(semaine)
+
+# people_psycho_weekly$semaine <- factor(people_psycho_weekly$semaine, levels = rev(levels(people_psycho_weekly$semaine))) 
+
+# colour <- c("#58A8E0","#ed6b90","#06d6a0")
+colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0")
+
+fig <- ggplot2::ggplot(data = people_psycho_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon l'évaluation psycho", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+
+fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#222831"))
+fig
+
+```
+
+
 ### Indicateurs partie nutrition
 
 ```{r nutrition}
