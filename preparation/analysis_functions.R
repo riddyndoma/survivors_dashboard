@@ -47,10 +47,14 @@ getFollowersBySex <- function(df,week_val,elem) {
   }
   
   answer=as.data.frame(answer)
-  rownames(answer)=c(paste0("Sem-",week_val)) #Renommage ligne pour porter numero de semaine
+  if (week_val < 10) {
+    rownames(answer)=c(paste0("Sem-0",week_val)) #Renommage ligne pour porter numero de semaine
+  }else{
+    rownames(answer)=c(paste0("Sem-",week_val)) #Renommage ligne pour porter numero de semaine
+  }
+ 
   return(answer)
 }
-
 
 
 ######################GET SURVIVORS BY SEX########################################################
@@ -139,3 +143,59 @@ getSpermeGenExpertResultCurrentMonth <- function(df,val) {
   return(answer)
   
 }
+
+##############################PSYCHO FUNCTIONS###########################################""
+getPsychoEvaluationByElem <- function(df,week_val,elem) {
+  answer=NULL
+  if (elem=="tris") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & pyscho_tristesse_douleur_morale == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="iso") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & psycho_retrait_social_isolement == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  } else if(elem=="suicid") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & psycho_pensees_suicidaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  } else if(elem=="honte") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & psycho_fort_sentiment_de_culpabilite_honte == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }
+  
+  answer=as.data.frame(answer)
+  if (week_val < 10) {
+    rownames(answer)=c(paste0("Sem-0",week_val)) #Renommage ligne pour porter numero de semaine
+  }else{
+    rownames(answer)=c(paste0("Sem-",week_val)) #Renommage ligne pour porter numero de semaine
+  }
+ 
+  return(answer)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
