@@ -32,7 +32,11 @@ followups_base_columns <- c(
   'questionnaireAnswers.date_du_rendez_vous',
   'questionnaireAnswers.nom_de_la_clinique',
   'questionnaireAnswers.mas',
-  'questionnaireAnswers.mam'
+  'questionnaireAnswers.mam',
+  'questionnaireAnswers.var_tristesse_douleur_morale',
+  'questionnaireAnswers.var4_retrait_social_isolement',
+  'questionnaireAnswers.pensees_suicidaires',
+  'questionnaireAnswers.fort_sentiment_de_culpabilite_honte'
 )
 
 # followups_base_clean_columns <- c(
