@@ -42,6 +42,7 @@ print(access_token)
 #     see below commented out code in Follow Ups section for an example
     date_now <- format(Sys.time(), "%Y-%m-%dT23:59:59.999Z")
     date_30d_ago <- format((Sys.Date() - 32), "%Y-%m-%dT23:59:59.999Z")
+    from_july_2020 <- format((Sys.Date() - 52), "%Y-%m-%dT23:59:59.999Z")
 ###################################################################################################
 
 ###################################################################################################
@@ -54,14 +55,14 @@ response_followups <- GET(paste0(
   "api/outbreaks/",
   outbreak_id,
   "/follow-ups/?filter={%22where%22:{%22and%22:[{%22date%22:{%22between%22:[%22",
-  date_30d_ago,
+  from_july_2020,
   "%22,%22",
   date_now,
   "%22]}}]}}"
 ),
 add_headers(Authorization = paste("Bearer", access_token, sep = " ")))
 json_followups <- content(response_followups, as="text")
-followups <- as_tibble(fromJSON(json_followups, flatten = TRUE)) 
+followups <- as_tibble(fromJSON(json_followups, flatten = TRUE))
 
 
 # import outbreak Cases 

@@ -200,6 +200,7 @@ unnested_followups <- followups_base_checked %>%
     questionnaireAnswers.var4_retrait_social_isolement,
     questionnaireAnswers.pensees_suicidaires,
     questionnaireAnswers.fort_sentiment_de_culpabilite_honte,
+    questionnaireAnswers.problemes_de_sommeil_recurrents,
     #Nutrition varaibles
     questionnaireAnswers.nom_de_la_clinique,
     questionnaireAnswers.mam,
@@ -505,6 +506,7 @@ cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_ques
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_var4_retrait_social_isolement_questionnaireanswers_var4_retrait_social_isolement")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_pensees_suicidaires_questionnaireanswers_pensees_suicidaires")
 cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_fort_sentiment_de_culpabilite_honte_questionnaireanswers_fort_sentiment_de_culpabilite_honte")
+cleaned_followups=correctingColumns(cleaned_followups,"questionnaireanswers_problemes_de_sommeil_recurrents_questionnaireanswers_problemes_de_sommeil_recurrents")
 ######################################################################################################################
 
 
@@ -601,7 +603,8 @@ cleaned_followups <- cleaned_followups %>%
          pyscho_tristesse_douleur_morale=questionnaireanswers_var_tristesse_douleur_morale_value,
          psycho_retrait_social_isolement=questionnaireanswers_var4_retrait_social_isolement_value,
          psycho_pensees_suicidaires=questionnaireanswers_pensees_suicidaires_value,
-         psycho_fort_sentiment_de_culpabilite_honte=questionnaireanswers_fort_sentiment_de_culpabilite_honte_value)
+         psycho_fort_sentiment_de_culpabilite_honte=questionnaireanswers_fort_sentiment_de_culpabilite_honte_value,
+         psycho_problemes_sommeil_recurrents=questionnaireanswers_problemes_de_sommeil_recurrents_value)
 
 #---------------LOCATIONS---------------------------------------------------------
 
