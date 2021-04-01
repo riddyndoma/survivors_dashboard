@@ -167,6 +167,11 @@ getPsychoEvaluationByElem <- function(df,week_val,elem) {
       filter(week(date_of_followup)==week_val & psycho_fort_sentiment_de_culpabilite_honte == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
       count()
     
+  }else if(elem=="psom_rec") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & psycho_problemes_sommeil_recurrents == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
   }
   
   answer=as.data.frame(answer)
