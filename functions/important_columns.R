@@ -33,10 +33,12 @@ followups_base_columns <- c(
   'questionnaireAnswers.nom_de_la_clinique',
   'questionnaireAnswers.mas',
   'questionnaireAnswers.mam',
+  #VAR Psycho
   'questionnaireAnswers.var_tristesse_douleur_morale',
   'questionnaireAnswers.var4_retrait_social_isolement',
   'questionnaireAnswers.pensees_suicidaires',
-  'questionnaireAnswers.fort_sentiment_de_culpabilite_honte'
+  'questionnaireAnswers.fort_sentiment_de_culpabilite_honte',
+  'questionnaireAnswers.problemes_de_sommeil_recurrents'
 )
 
 # followups_base_clean_columns <- c(
