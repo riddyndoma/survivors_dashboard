@@ -864,8 +864,11 @@ tristesse_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,curr
 tristesse_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"tris")
 tristesse_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"tris")
 tristesse_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"tris")
+tristesse_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"tris")
 
-tristesse_followed_weekly=rbind(tristesse_followed_current_week,tristesse_followed_1week_ago,tristesse_followed_2weeks_ago,tristesse_followed_3weeks_ago,tristesse_followed_4weeks_ago)
+tristesse_followed_weekly=rbind(tristesse_followed_current_week,tristesse_followed_1week_ago,
+                                tristesse_followed_2weeks_ago,tristesse_followed_3weeks_ago,
+                                tristesse_followed_4weeks_ago,tristesse_followed_5weeks_ago)
 setDT(tristesse_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 tristesse_followed_weekly=tristesse_followed_weekly%>%
   mutate(eval="Tristesse, douleur morale")
@@ -876,8 +879,11 @@ isolement_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,curr
 isolement_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"iso")
 isolement_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"iso")
 isolement_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"iso")
+isolement_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"iso")
 
-isolement_followed_weekly=rbind(isolement_followed_current_week,isolement_followed_1week_ago,isolement_followed_2weeks_ago,isolement_followed_3weeks_ago,isolement_followed_4weeks_ago)
+isolement_followed_weekly=rbind(isolement_followed_current_week,isolement_followed_1week_ago,
+                                isolement_followed_2weeks_ago,isolement_followed_3weeks_ago,
+                                isolement_followed_4weeks_ago,isolement_followed_5weeks_ago)
 setDT(isolement_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 isolement_followed_weekly=isolement_followed_weekly%>%
   mutate(eval="Retrait social, isolement")
@@ -888,8 +894,12 @@ suicide_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,curren
 suicide_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"suicid")
 suicide_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"suicid")
 suicide_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"suicid")
+suicide_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"suicid")
 
-suicide_followed_weekly=rbind(suicide_followed_current_week,suicide_followed_1week_ago,suicide_followed_2weeks_ago,suicide_followed_3weeks_ago,suicide_followed_4weeks_ago)
+suicide_followed_weekly=rbind(suicide_followed_current_week,
+                              suicide_followed_1week_ago, suicide_followed_2weeks_ago,
+                              suicide_followed_3weeks_ago,suicide_followed_4weeks_ago,
+                              suicide_followed_5weeks_ago)
 setDT(suicide_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 suicide_followed_weekly=suicide_followed_weekly%>%
   mutate(eval="Pensées suicidaires")
@@ -900,23 +910,44 @@ honte_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_
 honte_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"honte")
 honte_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"honte")
 honte_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"honte")
+honte_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"honte")
 
-honte_followed_weekly=rbind(honte_followed_current_week,honte_followed_1week_ago,honte_followed_2weeks_ago,honte_followed_3weeks_ago,honte_followed_4weeks_ago)
+honte_followed_weekly=rbind(honte_followed_current_week,honte_followed_1week_ago,
+                            honte_followed_2weeks_ago,honte_followed_3weeks_ago,
+                            honte_followed_4weeks_ago,honte_followed_5weeks_ago)
 setDT(honte_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
 honte_followed_weekly=honte_followed_weekly%>%
   mutate(eval=" Fort sentiment de culpabilité/honte")
 #---------------------------------------------------------------------
 
+probleme_sommeil_recurrent_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"psom_rec")
+probleme_sommeil_recurrent_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"psom_rec")
+probleme_sommeil_recurrent_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"psom_rec")
+probleme_sommeil_recurrent_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"psom_rec")
+probleme_sommeil_recurrent_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"psom_rec")
+probleme_sommeil_recurrent_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"psom_rec")
+
+probleme_sommeil_recurrent_followed_weekly=rbind(probleme_sommeil_recurrent_followed_current_week,
+                                                 probleme_sommeil_recurrent_followed_1week_ago,
+                                                 probleme_sommeil_recurrent_followed_2weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_3weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_4weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_5weeks_ago)
+setDT(probleme_sommeil_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+probleme_sommeil_recurrent_followed_weekly=probleme_sommeil_recurrent_followed_weekly%>%
+  mutate(eval="Problèmes de sommeil récurrents")
+#---------------------------------------------------------------------
+
 people_psycho_weekly=rbind(tristesse_followed_weekly,
                            isolement_followed_weekly,
                            suicide_followed_weekly,
-                           honte_followed_weekly) %>%
+                           honte_followed_weekly,probleme_sommeil_recurrent_followed_weekly) %>%
   arrange(semaine)
 
 # people_psycho_weekly$semaine <- factor(people_psycho_weekly$semaine, levels = rev(levels(people_psycho_weekly$semaine))) 
 
 # colour <- c("#58A8E0","#ed6b90","#06d6a0")
-colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0")
+colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747")
 
 fig <- ggplot2::ggplot(data = people_psycho_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
 fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
