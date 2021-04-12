@@ -1,8 +1,10 @@
 ## This script is for cleaning the Go data data, revised to use the collections pulled directly from API !
-library(dplyr)
+library(dplyr,warn.conflicts = FALSE)
+
 library(tidyr)
 library(rio)
 library(linelist)
+library(vctrs)
 
 options(max.print=1000000)
 
@@ -44,12 +46,12 @@ copy_teams <- teams
 copy_users <- users
 
 #-----Data recovery---------
-followups <- copy_followups
-cases <- copy_cases
-contacts <- copy_contacts
-relationships <- copy_relationships
-teams <- copy_teams
-users <- copy_users
+# followups <- copy_followups
+# cases <- copy_cases
+# contacts <- copy_contacts
+# relationships <- copy_relationships
+# teams <- copy_teams
+# users <- copy_users
 
 #################### UNNEST TIBBLES ############################################
 
@@ -69,10 +71,10 @@ unnested_cases <- cases %>%
     keep_empty = TRUE, names_sep = "_")
 
 
-followups_base_checked=AddingColumns(followups,followups_base_columns) #Adding some important columns who can missed
+fwps_colmns_checked <- AddingColumns(followups,followups_base_columns) #Adding some important columns who can missed
 
 #Follow up data, under follow up, active, not deleted, also unnest all nested fields
-unnested_followups <- followups_base_checked %>%
+unnested_followups <- fwps_colmns_checked %>%
   filter(deleted == FALSE) %>%
   filter(contact.active == TRUE) %>%
   unnest(c(
@@ -189,10 +191,8 @@ unnested_followups <- followups_base_checked %>%
     questionnaireAnswers.souvenirs_repetitifs_de_situations_liees_a_ebola,
     questionnaireAnswers.reves_repetitifs_lies_a_ebola,
     questionnaireAnswers.abus_dalcool_ou_de_substance,
-    # questionnaireAnswers.vous_sentez_vous_stigmatise_par_la_communaute,
     questionnaireAnswers.evenement_traumatique,
     questionnaireAnswers.symptomatologie_actuelle,
-    # questionnaireAnswers.vr_vous_sentez_vous_limite_dans_vos_activites_en_raison_dun_probleme_de_sante,
     questionnaireAnswers.refere_pour_des_soins_appropries,
     questionnaireAnswers.socia_structure_de_sante,
     #Pycho vars new
@@ -205,9 +205,10 @@ unnested_followups <- followups_base_checked %>%
     questionnaireAnswers.nom_de_la_clinique,
     questionnaireAnswers.mam,
     questionnaireAnswers.mas
+   
   ),
   
-  keep_empty = TRUE, names_sep = "_")
+  keep_empty = TRUE, names_sep = "_") 
 
 
 #Active contacts, currently under follow up (using follow up end date in case the status is off, as it sometimes is.); also unnest all nested fields
@@ -604,7 +605,27 @@ cleaned_followups <- cleaned_followups %>%
          psycho_retrait_social_isolement=questionnaireanswers_var4_retrait_social_isolement_value,
          psycho_pensees_suicidaires=questionnaireanswers_pensees_suicidaires_value,
          psycho_fort_sentiment_de_culpabilite_honte=questionnaireanswers_fort_sentiment_de_culpabilite_honte_value,
-         psycho_problemes_sommeil_recurrents=questionnaireanswers_problemes_de_sommeil_recurrents_value)
+         psycho_problemes_sommeil_recurrents=questionnaireanswers_problemes_de_sommeil_recurrents_value,
+         #Clinique
+         clin_cmd_douleurs_osteo_articulaires = questionnaireanswers_cmd_douleurs_osteo_articulaires_value,
+         clin_douleurs_musculaires = questionnaireanswers_var_douleurs_musculaires_value,
+         clin_douleurs_lombaires = questionnaireanswers_douleurs_lombaires_value,
+         clin_douleurs_ocuiaires = questionnaireanswers_douleurs_ocuiaires_value,
+         clin_baisse_de_la_vision = questionnaireanswers_baisse_de_la_vision_value,
+         clin_oeil_rouge = questionnaireanswers_oeil_rouge_value,
+         clin_larmoiement = questionnaireanswers_larmoiement_value,
+         clin_photophobie = questionnaireanswers_et_photophobie_value,
+         clin_baisse_de_laudition = questionnaireanswers_baisse_de_laudition_value,
+         clin_bourdonnement_doreille = questionnaireanswers_bourdonnement_doreille_value,
+         clin_trouble_erectile=questionnaireanswers_trouble_erectile_value,
+         clin_douleurs_testiculaires = questionnaireanswers_douleurs_testiculaires_value,
+         clin_amenorrhee = questionnaireanswers_amenorrhee_value,
+         clin_baisse_de_la_libido = questionnaireanswers_amenorrhee_baisse_de_la_libido_value,
+         clin_leucorrhees = questionnaireanswers_leucorrhees_value,
+         clin_hemorragie = questionnaireanswers_hemorragie_value
+         
+         
+         )
 
 #---------------LOCATIONS---------------------------------------------------------
 
