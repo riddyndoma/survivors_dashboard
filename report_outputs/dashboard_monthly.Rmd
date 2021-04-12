@@ -76,7 +76,7 @@ yesterday=current_date-1
 current_week=date2week(now(), numeric = TRUE) #Modif
 current_month <- formatDate <- format(Sys.Date(), "%Y-%m") #Modif
 previous_7days=current_date-7
-previous_30days=current_date-30 #Modif
+previous_30days=current_date-50 #Modif
 
 dfw_today_followups=current_clean_followups %>%
   filter(date_of_followup == current_date)
@@ -431,7 +431,7 @@ fig
 
 
 INDICATEURS CLINIQUES, BIOLOGIQUES ET PSYCHO {data-icon="fa-notes-medical"}
-======================================================================
+===========================================================================
 Column {data-width=5%}
 -----------------------------------------------------------------------
 
@@ -802,8 +802,6 @@ df_psycho=df_psycho %>%
 df_psycho
 
 
-
-
 #-----------------SECOND TAB---------------------------------------------------------
 psycho_followed_current_month = dfw_30days_followups %>%
   filter(!is.na(structure_suivi_psychologique) &
@@ -1084,4 +1082,486 @@ g
 
 ```
 
+COURBE {data-icon="fa-notes-medical"}
+===========================================================================
+Column {.tabset data-width=100%}
+-----------------------------------------------------------------------
+### Evaluation clinique - 1
+
+#### Symptômes Rhumato
+
+```{r symptomes-rhumato, fig.height=4, fig.width=17,fig.align='center'}
+douleurs_osteo_articulaires_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"doart")
+douleurs_osteo_articulaires_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"doart")
+douleurs_osteo_articulaires_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"doart")
+douleurs_osteo_articulaires_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"doart")
+douleurs_osteo_articulaires_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"doart")
+douleurs_osteo_articulaires_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"doart")
+
+
+douleurs_osteo_articulaires_followed_weekly=rbind(douleurs_osteo_articulaires_followed_current_week,douleurs_osteo_articulaires_followed_1week_ago,
+                                douleurs_osteo_articulaires_followed_2weeks_ago,douleurs_osteo_articulaires_followed_3weeks_ago,
+                                douleurs_osteo_articulaires_followed_4weeks_ago,douleurs_osteo_articulaires_followed_5weeks_ago)
+setDT(douleurs_osteo_articulaires_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+douleurs_osteo_articulaires_followed_weekly=douleurs_osteo_articulaires_followed_weekly%>%
+  mutate(eval="Douleurs osteo articulaires")
+#-------------------------------------------------------------------------
+
+douleurs_musculaires_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"domus")
+douleurs_musculaires_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"domus")
+douleurs_musculaires_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"domus")
+douleurs_musculaires_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"domus")
+douleurs_musculaires_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"domus")
+douleurs_musculaires_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"domus")
+
+
+douleurs_musculaires_followed_weekly=rbind(douleurs_musculaires_followed_current_week,douleurs_musculaires_followed_1week_ago,
+                                douleurs_musculaires_followed_2weeks_ago,douleurs_musculaires_followed_3weeks_ago,
+                                douleurs_musculaires_followed_4weeks_ago,douleurs_musculaires_followed_5weeks_ago)
+setDT(douleurs_musculaires_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+douleurs_musculaires_followed_weekly=douleurs_musculaires_followed_weekly%>%
+  mutate(eval="Douleurs musculaires")
+#-----------------------------------------------------------------------
+
+douleurs_lombaires_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"dolomb")
+douleurs_lombaires_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"dolomb")
+douleurs_lombaires_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"dolomb")
+douleurs_lombaires_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"dolomb")
+douleurs_lombaires_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"dolomb")
+douleurs_lombaires_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"dolomb")
+
+
+douleurs_lombaires_followed_weekly=rbind(douleurs_lombaires_followed_current_week,douleurs_lombaires_followed_1week_ago,
+                            douleurs_lombaires_followed_2weeks_ago,douleurs_lombaires_followed_3weeks_ago,
+                            douleurs_lombaires_followed_4weeks_ago,douleurs_lombaires_followed_5weeks_ago)
+setDT(douleurs_lombaires_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+douleurs_lombaires_followed_weekly=douleurs_lombaires_followed_weekly%>%
+  mutate(eval="Douleurs lombaires")
+
+#----------------------------------------------------------------------
+
+people_clin_weekly=rbind(douleurs_osteo_articulaires_followed_weekly,
+                           douleurs_musculaires_followed_weekly,
+                           douleurs_lombaires_followed_weekly) %>%
+                           arrange(semaine)
+
+# people_clin_weekly$semaine <- factor(people_clin_weekly$semaine, levels = rev(levels(people_clin_weekly$semaine))) 
+
+colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747")
+
+fig <- ggplot2::ggplot(data = people_clin_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon les symptômes Rhumato", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+
+fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#222831"))
+fig
+
+```
+
+#### Symptômes Ophtamo
+```{r symptomes-Ophtamo, fig.height=4, fig.width=17,fig.align='center'}
+douleurs_oculaires_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"docul")
+douleurs_oculaires_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"docul")
+douleurs_oculaires_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"docul")
+douleurs_oculaires_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"docul")
+douleurs_oculaires_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"docul")
+douleurs_oculaires_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"docul")
+
+douleurs_oculaires_recurrent_followed_weekly=rbind(douleurs_oculaires_recurrent_followed_current_week,
+                                                 douleurs_oculaires_recurrent_followed_1week_ago,
+                                                 douleurs_oculaires_recurrent_followed_2weeks_ago,
+                                                 douleurs_oculaires_recurrent_followed_3weeks_ago,
+                                                 douleurs_oculaires_recurrent_followed_4weeks_ago,
+                                                 douleurs_oculaires_recurrent_followed_5weeks_ago)
+setDT(douleurs_oculaires_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+douleurs_oculaires_recurrent_followed_weekly=douleurs_oculaires_recurrent_followed_weekly%>%
+  mutate(eval="Douleurs oculaires")
+#---------------------------------------------------------------------
+baisse_de_la_vision_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"baivis")
+baisse_de_la_vision_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"baivis")
+baisse_de_la_vision_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"baivis")
+baisse_de_la_vision_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"baivis")
+baisse_de_la_vision_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"baivis")
+baisse_de_la_vision_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"baivis")
+
+baisse_de_la_vision_followed_weekly=rbind(baisse_de_la_vision_followed_current_week,
+                              baisse_de_la_vision_followed_1week_ago, baisse_de_la_vision_followed_2weeks_ago,
+                              baisse_de_la_vision_followed_3weeks_ago,baisse_de_la_vision_followed_4weeks_ago,
+                              baisse_de_la_vision_followed_5weeks_ago)
+setDT(baisse_de_la_vision_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+baisse_de_la_vision_followed_weekly=baisse_de_la_vision_followed_weekly%>%
+  mutate(eval="Baisse de la vision")
+#---------------------------------------------------------------------
+oeil_rouge_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"oeilrg")
+oeil_rouge_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"oeilrg")
+oeil_rouge_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"oeilrg")
+oeil_rouge_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"oeilrg")
+oeil_rouge_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"oeilrg")
+oeil_rouge_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"oeilrg")
+
+oeil_rouge_followed_weekly=rbind(oeil_rouge_followed_current_week,
+                              oeil_rouge_followed_1week_ago, 
+                              oeil_rouge_followed_2weeks_ago,
+                              oeil_rouge_followed_3weeks_ago,
+                              oeil_rouge_followed_4weeks_ago,
+                              oeil_rouge_followed_5weeks_ago)
+setDT(oeil_rouge_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+oeil_rouge_followed_weekly=oeil_rouge_followed_weekly%>%
+  mutate(eval="Oeil rouge")
+#---------------------------------------------------------------------
+larmoiement_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"larmoie")
+larmoiement_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"larmoie")
+larmoiement_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"larmoie")
+larmoiement_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"larmoie")
+larmoiement_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"larmoie")
+larmoiement_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"larmoie")
+
+larmoiement_followed_weekly=rbind(larmoiement_followed_current_week,
+                              larmoiement_followed_1week_ago, 
+                              larmoiement_followed_2weeks_ago,
+                              larmoiement_followed_3weeks_ago,
+                              larmoiement_followed_4weeks_ago,
+                              larmoiement_followed_5weeks_ago)
+setDT(larmoiement_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+larmoiement_followed_weekly=larmoiement_followed_weekly%>%
+  mutate(eval="Larmoiement")
+#---------------------------------------------------------------------
+photophobie_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"photo")
+photophobie_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"photo")
+photophobie_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"photo")
+photophobie_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"photo")
+photophobie_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"photo")
+photophobie_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"photo")
+
+photophobie_followed_weekly=rbind(photophobie_followed_current_week,
+                              photophobie_followed_1week_ago, 
+                              photophobie_followed_2weeks_ago,
+                              photophobie_followed_3weeks_ago,
+                              photophobie_followed_4weeks_ago,
+                              photophobie_followed_5weeks_ago)
+setDT(photophobie_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+photophobie_followed_weekly=photophobie_followed_weekly%>%
+  mutate(eval="Photophobie")
+#---------------------------------------------------------------------
+
+people_clin_weekly=rbind(douleurs_oculaires_recurrent_followed_weekly,
+                           baisse_de_la_vision_followed_weekly,
+                           oeil_rouge_followed_weekly,
+                           larmoiement_followed_weekly,
+                           photophobie_followed_weekly) %>%
+                           arrange(semaine)
+
+colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747")
+
+fig <- ggplot2::ggplot(data = people_clin_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon les symptômes Ophtamo", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+
+fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#222831"))
+fig
+
+```
+
+### Evaluation clinique - 2
+
+#### Symptômes ORL
+```{r symptomes-orl, fig.height=4, fig.width=17,fig.align='center'}
+# baisse_de_laudition_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"baisaud")
+# baisse_de_laudition_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"baisaud")
+# baisse_de_laudition_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"baisaud")
+# baisse_de_laudition_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"baisaud")
+# baisse_de_laudition_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"baisaud")
+# baisse_de_laudition_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"baisaud")
+# 
+# baisse_de_laudition_followed_weekly=rbind(baisse_de_laudition_followed_current_week,
+#                               baisse_de_laudition_followed_1week_ago, 
+#                               baisse_de_laudition_followed_2weeks_ago,
+#                               baisse_de_laudition_followed_3weeks_ago,
+#                               baisse_de_laudition_followed_4weeks_ago,
+#                               baisse_de_laudition_followed_5weeks_ago)
+# setDT(baisse_de_laudition_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# baisse_de_laudition_followed_weekly=baisse_de_laudition_followed_weekly%>%
+#   mutate(eval="baisse de l'audition")
+# #---------------------------------------------------------------------
+# 
+# bourdonnement_doreille_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"bourdoreil")
+# bourdonnement_doreille_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"bourdoreil")
+# bourdonnement_doreille_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"bourdoreil")
+# bourdonnement_doreille_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"bourdoreil")
+# bourdonnement_doreille_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"bourdoreil")
+# bourdonnement_doreille_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"bourdoreil")
+# 
+# bourdonnement_doreille_followed_weekly=rbind(bourdonnement_doreille_followed_current_week,
+#                               bourdonnement_doreille_followed_1week_ago, 
+#                               bourdonnement_doreille_followed_2weeks_ago,
+#                               bourdonnement_doreille_followed_3weeks_ago,
+#                               bourdonnement_doreille_followed_4weeks_ago,
+#                               bourdonnement_doreille_followed_5weeks_ago)
+# setDT(bourdonnement_doreille_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# bourdonnement_doreille_followed_weekly=bourdonnement_doreille_followed_weekly%>%
+#   mutate(eval="Bourdonnement d’oreille")
+# #---------------------------------------------------------------------
+# people_clin_weekly=rbind(baisse_de_laudition_followed_weekly,
+#                          bourdonnement_doreille_followed_weekly) %>%
+#                            arrange(semaine)
+# 
+# colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747")
+# 
+# fig <- ggplot2::ggplot(data = people_clin_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+# fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+# fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon les symptômes ORL", subtitle = )
+# fig <- fig + scale_colour_manual(values=colour)
+# 
+# fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+#                                   size=0.5, linetype="solid", 
+#                                   colour ="#222831"))
+# fig
+
+```
+
+#### Symptômes Reproduction
+```{r symptomes-reproduction, fig.height=4, fig.width=17,fig.align='center'}
+# trouble_erectile_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"troub_erect")
+# trouble_erectile_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"troub_erect")
+# trouble_erectile_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"troub_erect")
+# trouble_erectile_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"troub_erect")
+# trouble_erectile_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"troub_erect")
+# trouble_erectile_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"troub_erect")
+# 
+# trouble_erectile_recurrent_followed_weekly=rbind(trouble_erectile_recurrent_followed_current_week,
+#                                                  trouble_erectile_recurrent_followed_1week_ago,
+#                                                  trouble_erectile_recurrent_followed_2weeks_ago,
+#                                                  trouble_erectile_recurrent_followed_3weeks_ago,
+#                                                  trouble_erectile_recurrent_followed_4weeks_ago,
+#                                                  trouble_erectile_recurrent_followed_5weeks_ago)
+# setDT(trouble_erectile_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# trouble_erectile_recurrent_followed_weekly=trouble_erectile_recurrent_followed_weekly%>%
+#   mutate(eval="Trouble érectile")
+# #---------------------------------------------------------------------
+# 
+# douleurs_testiculaires_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"doul_testicu")
+# douleurs_testiculaires_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"doul_testicu")
+# douleurs_testiculaires_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"doul_testicu")
+# douleurs_testiculaires_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"doul_testicu")
+# douleurs_testiculaires_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"doul_testicu")
+# douleurs_testiculaires_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"doul_testicu")
+# 
+# douleurs_testiculaires_recurrent_followed_weekly=rbind(douleurs_testiculaires_recurrent_followed_current_week,
+#                                                  douleurs_testiculaires_recurrent_followed_1week_ago,
+#                                                  douleurs_testiculaires_recurrent_followed_2weeks_ago,
+#                                                  douleurs_testiculaires_recurrent_followed_3weeks_ago,
+#                                                  douleurs_testiculaires_recurrent_followed_4weeks_ago,
+#                                                  douleurs_testiculaires_recurrent_followed_5weeks_ago)
+# setDT(douleurs_testiculaires_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# douleurs_testiculaires_recurrent_followed_weekly=douleurs_testiculaires_recurrent_followed_weekly%>%
+#   mutate(eval="Douleurs testiculaires")
+# #---------------------------------------------------------------------
+# 
+# amenorrhee_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"amenorrhee")
+# amenorrhee_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"amenorrhee")
+# amenorrhee_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"amenorrhee")
+# amenorrhee_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"amenorrhee")
+# amenorrhee_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"amenorrhee")
+# amenorrhee_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"amenorrhee")
+# 
+# amenorrhee_recurrent_followed_weekly=rbind(amenorrhee_recurrent_followed_current_week,
+#                                                  amenorrhee_recurrent_followed_1week_ago,
+#                                                  amenorrhee_recurrent_followed_2weeks_ago,
+#                                                  amenorrhee_recurrent_followed_3weeks_ago,
+#                                                  amenorrhee_recurrent_followed_4weeks_ago,
+#                                                  amenorrhee_recurrent_followed_5weeks_ago)
+# setDT(amenorrhee_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# amenorrhee_recurrent_followed_weekly=amenorrhee_recurrent_followed_weekly%>%
+#   mutate(eval="Aménorrhée")
+# #---------------------------------------------------------------------
+# 
+# baisse_libido_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"baisse_de_la_libido")
+# baisse_libido_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"baisse_de_la_libido")
+# baisse_libido_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"baisse_de_la_libido")
+# baisse_libido_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"baisse_de_la_libido")
+# baisse_libido_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"baisse_de_la_libido")
+# baisse_libido_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"baisse_de_la_libido")
+# 
+# baisse_libido_recurrent_followed_weekly=rbind(baisse_libido_recurrent_followed_current_week,
+#                                                  baisse_libido_recurrent_followed_1week_ago,
+#                                                  baisse_libido_recurrent_followed_2weeks_ago,
+#                                                  baisse_libido_recurrent_followed_3weeks_ago,
+#                                                  baisse_libido_recurrent_followed_4weeks_ago,
+#                                                  baisse_libido_recurrent_followed_5weeks_ago)
+# setDT(baisse_libido_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# baisse_libido_recurrent_followed_weekly=baisse_libido_recurrent_followed_weekly%>%
+#   mutate(eval="Baisse de la libido")
+# #---------------------------------------------------------------------
+# 
+# leucorrhees_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"leucorrhees")
+# leucorrhees_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"leucorrhees")
+# leucorrhees_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"leucorrhees")
+# leucorrhees_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"leucorrhees")
+# leucorrhees_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"leucorrhees")
+# leucorrhees_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"leucorrhees")
+# 
+# leucorrhees_recurrent_followed_weekly=rbind(leucorrhees_recurrent_followed_current_week,
+#                                                  leucorrhees_recurrent_followed_1week_ago,
+#                                                  leucorrhees_recurrent_followed_2weeks_ago,
+#                                                  leucorrhees_recurrent_followed_3weeks_ago,
+#                                                  leucorrhees_recurrent_followed_4weeks_ago,
+#                                                  leucorrhees_recurrent_followed_5weeks_ago)
+# setDT(leucorrhees_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# leucorrhees_recurrent_followed_weekly=leucorrhees_recurrent_followed_weekly%>%
+#   mutate(eval="Leucorrhées")
+# #---------------------------------------------------------------------
+# 
+# hemorragie_recurrent_followed_current_week=getClinicalEvaluationByElem(dfw_30days_followups,current_week,"hemorragie")
+# hemorragie_recurrent_followed_1week_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-1,"hemorragie")
+# hemorragie_recurrent_followed_2weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-2,"hemorragie")
+# hemorragie_recurrent_followed_3weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-3,"hemorragie")
+# hemorragie_recurrent_followed_4weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-4,"hemorragie")
+# hemorragie_recurrent_followed_5weeks_ago=getClinicalEvaluationByElem(dfw_30days_followups,current_week-5,"hemorragie")
+# 
+# hemorragie_recurrent_followed_weekly=rbind(hemorragie_recurrent_followed_current_week,
+#                                                  hemorragie_recurrent_followed_1week_ago,
+#                                                  hemorragie_recurrent_followed_2weeks_ago,
+#                                                  hemorragie_recurrent_followed_3weeks_ago,
+#                                                  hemorragie_recurrent_followed_4weeks_ago,
+#                                                  hemorragie_recurrent_followed_5weeks_ago)
+# setDT(hemorragie_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+# hemorragie_recurrent_followed_weekly=hemorragie_recurrent_followed_weekly%>%
+#   mutate(eval="Hémorragie")
+# #---------------------------------------------------------------------
+# 
+# people_clin_weekly=rbind(trouble_erectile_recurrent_followed_weekly,
+#                          douleurs_testiculaires_recurrent_followed_weekly,
+#                          amenorrhee_recurrent_followed_weekly,
+#                          baisse_libido_recurrent_followed_weekly,
+#                          leucorrhees_recurrent_followed_weekly,
+#                          hemorragie_recurrent_followed_weekly) %>%
+#                            arrange(semaine)
+# 
+# colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747","#a8dadc","#457b9d")
+# 
+# fig <- ggplot2::ggplot(data = people_clin_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+# fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+# fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon les symptômes reproduction", subtitle = )
+# fig <- fig + scale_colour_manual(values=colour)
+# 
+# fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+#                                   size=0.5, linetype="solid", 
+#                                   colour ="#222831"))
+# fig
+
+```
+
+
+### Evaluation Psycho - >
+
+#### >
+```{r eval-psycho_eval, fig.height=4,fig.width=18,fig.align='center'}
+#---------------------------Eval chart------------------------------------------
+tristesse_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"tris")
+tristesse_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"tris")
+tristesse_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"tris")
+tristesse_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"tris")
+tristesse_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"tris")
+tristesse_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"tris")
+
+tristesse_followed_weekly=rbind(tristesse_followed_current_week,tristesse_followed_1week_ago,
+                                tristesse_followed_2weeks_ago,tristesse_followed_3weeks_ago,
+                                tristesse_followed_4weeks_ago,tristesse_followed_5weeks_ago)
+setDT(tristesse_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+tristesse_followed_weekly=tristesse_followed_weekly%>%
+  mutate(eval="Tristesse, douleur morale")
+#-------------------------------------------------------------------------
+
+isolement_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"iso")
+isolement_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"iso")
+isolement_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"iso")
+isolement_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"iso")
+isolement_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"iso")
+isolement_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"iso")
+
+isolement_followed_weekly=rbind(isolement_followed_current_week,isolement_followed_1week_ago,
+                                isolement_followed_2weeks_ago,isolement_followed_3weeks_ago,
+                                isolement_followed_4weeks_ago,isolement_followed_5weeks_ago)
+setDT(isolement_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+isolement_followed_weekly=isolement_followed_weekly%>%
+  mutate(eval="Retrait social, isolement")
+#-----------------------------------------------------------------------
+
+suicide_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"suicid")
+suicide_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"suicid")
+suicide_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"suicid")
+suicide_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"suicid")
+suicide_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"suicid")
+suicide_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"suicid")
+
+suicide_followed_weekly=rbind(suicide_followed_current_week,
+                              suicide_followed_1week_ago, suicide_followed_2weeks_ago,
+                              suicide_followed_3weeks_ago,suicide_followed_4weeks_ago,
+                              suicide_followed_5weeks_ago)
+setDT(suicide_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+suicide_followed_weekly=suicide_followed_weekly%>%
+  mutate(eval="Pensées suicidaires")
+#----------------------------------------------------------------------
+
+honte_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"honte")
+honte_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"honte")
+honte_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"honte")
+honte_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"honte")
+honte_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"honte")
+honte_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"honte")
+
+honte_followed_weekly=rbind(honte_followed_current_week,honte_followed_1week_ago,
+                            honte_followed_2weeks_ago,honte_followed_3weeks_ago,
+                            honte_followed_4weeks_ago,honte_followed_5weeks_ago)
+setDT(honte_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+honte_followed_weekly=honte_followed_weekly%>%
+  mutate(eval=" Fort sentiment de culpabilité/honte")
+#---------------------------------------------------------------------
+
+probleme_sommeil_recurrent_followed_current_week=getPsychoEvaluationByElem(dfw_30days_followups,current_week,"psom_rec")
+probleme_sommeil_recurrent_followed_1week_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-1,"psom_rec")
+probleme_sommeil_recurrent_followed_2weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-2,"psom_rec")
+probleme_sommeil_recurrent_followed_3weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-3,"psom_rec")
+probleme_sommeil_recurrent_followed_4weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-4,"psom_rec")
+probleme_sommeil_recurrent_followed_5weeks_ago=getPsychoEvaluationByElem(dfw_30days_followups,current_week-5,"psom_rec")
+
+probleme_sommeil_recurrent_followed_weekly=rbind(probleme_sommeil_recurrent_followed_current_week,
+                                                 probleme_sommeil_recurrent_followed_1week_ago,
+                                                 probleme_sommeil_recurrent_followed_2weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_3weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_4weeks_ago,
+                                                 probleme_sommeil_recurrent_followed_5weeks_ago)
+setDT(probleme_sommeil_recurrent_followed_weekly, keep.rownames = "semaine") #Convert rowname to first column
+probleme_sommeil_recurrent_followed_weekly=probleme_sommeil_recurrent_followed_weekly%>%
+  mutate(eval="Problèmes de sommeil récurrents")
+#---------------------------------------------------------------------
+
+people_psycho_weekly=rbind(tristesse_followed_weekly,
+                           isolement_followed_weekly,
+                           suicide_followed_weekly,
+                           honte_followed_weekly,probleme_sommeil_recurrent_followed_weekly) %>%
+  arrange(semaine)
+
+# people_psycho_weekly$semaine <- factor(people_psycho_weekly$semaine, levels = rev(levels(people_psycho_weekly$semaine))) 
+
+# colour <- c("#58A8E0","#ed6b90","#06d6a0")
+colour <-c("#ec524b","#9ad3bc","#f5b461","#58A8E0","#283747")
+
+fig <- ggplot2::ggplot(data = people_psycho_weekly)+geom_line(aes(x=semaine,y=n,colour = eval, group=eval),size=1)
+fig <- fig + theme(legend.position="bottom", legend.direction="horizontal", legend.title = element_blank())
+fig <- fig + theme_classic()+labs(x="",y="Nombre de gueris", title = "Guéris suivis par semaine, selon l'évaluation psycho", subtitle = )
+fig <- fig + scale_colour_manual(values=colour)
+
+fig <- fig + theme(legend.background = element_rect(fill="#f2f4c0",
+                                  size=0.5, linetype="solid", 
+                                  colour ="#222831"))
+fig
+
+```
 
