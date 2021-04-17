@@ -144,7 +144,7 @@ getSpermeGenExpertResultCurrentMonth <- function(df,val) {
   
 }
 
-##############################PSYCHO FUNCTIONS###########################################""
+##############################PSYCHO FUNCTIONS###########################################"
 getPsychoEvaluationByElem <- function(df,week_val,elem) {
   answer=NULL
   if (elem=="tris") {
@@ -184,6 +184,101 @@ getPsychoEvaluationByElem <- function(df,week_val,elem) {
   return(answer)
 }
 
+##############################CLINICAL FUNCTIONS###########################################"
+getClinicalEvaluationByElem <- function(df,week_val,elem) {
+  answer=NULL
+  if (elem=="doul_osta") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_cmd_douleurs_osteo_articulaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="doul_mus") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_douleurs_musculaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  } else if(elem=="doul_lomb") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_douleurs_lombaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  } else if(elem=="doul_ocu") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_douleurs_ocuiaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="bais_vis") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_baisse_de_la_vision == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="oel_rg") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_oeil_rouge == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="larmoie") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_larmoiement == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="photo") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_photophobie == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="bais_aud") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_baisse_de_laudition == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="bourd_oreil") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_bourdonnement_doreille == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="troub_erect") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_trouble_erectile == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="doul_test") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_douleurs_testiculaires == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="amenorrhee") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_amenorrhee == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="bais_lib") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_baisse_de_la_libido == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="leucorrhees") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_leucorrhees == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }else if(elem=="hemorragie") {
+    answer=df %>%
+      filter(week(date_of_followup)==week_val & clin_hemorragie  == "oui" & (status == "Vu sans signe" | status == "Vu avec signe")) %>%
+      count()
+    
+  }
+  
+  
+  answer=as.data.frame(answer)
+  if (week_val < 10) {
+    rownames(answer)=c(paste0("Sem-0",week_val)) #Renommage ligne pour porter numero de semaine
+  }else{
+    rownames(answer)=c(paste0("Sem-",week_val)) #Renommage ligne pour porter numero de semaine
+  }
+  
+  return(answer)
+}
 
 
 

@@ -620,7 +620,7 @@ cleaned_followups <- cleaned_followups %>%
          clin_trouble_erectile=questionnaireanswers_trouble_erectile_value,
          clin_douleurs_testiculaires = questionnaireanswers_douleurs_testiculaires_value,
          clin_amenorrhee = questionnaireanswers_amenorrhee_value,
-         clin_baisse_de_la_libido = questionnaireanswers_amenorrhee_baisse_de_la_libido_value,
+         clin_baisse_de_la_libido = questionnaireanswers_baisse_de_la_libido_value,
          clin_leucorrhees = questionnaireanswers_leucorrhees_value,
          clin_hemorragie = questionnaireanswers_hemorragie_value
          

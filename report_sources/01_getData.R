@@ -3,7 +3,7 @@
 url <- "https://godata-response1.who.int/"              
 username <- "rndoma@immap.org"                          
 password <- "adminadminadmin2020"                      
-outbreak_id <- "d5ee2e11-756f-453d-a891-9fcc93a942b1"   
+outbreak_id <- "d5ee2e11-756f-453d-a891-9fcc93a942b1"
 
 ###################################################################################################
 # source required scripts, including packages that need to be installed
@@ -42,20 +42,21 @@ print(access_token)
 #     see below commented out code in Follow Ups section for an example
     date_now <- format(Sys.time(), "%Y-%m-%dT23:59:59.999Z")
     date_30d_ago <- format((Sys.Date() - 32), "%Y-%m-%dT23:59:59.999Z")
-    from_july_2020 <- format((Sys.Date() - 52), "%Y-%m-%dT23:59:59.999Z")
+    # from_july_2020 <- format((Sys.Date() - 52), "%Y-%m-%dT23:59:59.999Z")
 ###################################################################################################
 
 ###################################################################################################
 # IMPORT ALL RELEVANT API COLLECTIONS BELOW 
 ###################################################################################################
 
+    
 # import contact follow-ups (could filter last 21 days only to avoid system time-out)
 response_followups <- GET(paste0(
   url,
   "api/outbreaks/",
   outbreak_id,
   "/follow-ups/?filter={%22where%22:{%22and%22:[{%22date%22:{%22between%22:[%22",
-  from_july_2020,
+  date_30d_ago,
   "%22,%22",
   date_now,
   "%22]}}]}}"
