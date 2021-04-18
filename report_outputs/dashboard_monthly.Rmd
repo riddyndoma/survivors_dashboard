@@ -1562,3 +1562,34 @@ fig
 
 ```
 
+### Généraux -> 2 
+```{r indi-generaux-2}
+library("lubridate")
+df_cases <- current_clean_cases %>%
+   select(uuid,date_of_reporting) %>%
+  mutate(p = interval( as.Date(date_of_reporting), Sys.Date()) %/% months(1),
+         segment=case_when(
+           p <= 6 ~ "0 - 6 mois",
+           p > 6 & p < 13 ~ "7 - 12 mois",
+           p > 12 & p < 19 ~ "13 - 18 mois",
+           p > 18 & p < 25 ~ "19 - 24 mois",
+           p > 24 ~ "25 mois et +"
+         )) %>%
+  group_by(segment) %>%
+  count()
+
+g=ggplot(data=df_cases, aes(x=reorder(segment, -n), y=n, fill=segment,stat="identity")) +
+  # geom_bar(stat="identity")+theme_classic(base_size = 14) +labs(x="",y="Effectifs", title = "", subtitle = )
+geom_bar(stat="identity")+theme_classic() +labs(x="",y="Effectifs", title = "", subtitle = )
+g=g+geom_text( aes(label = n, y = n),position = position_dodge(0.9),vjust = 0)
+g=g+scale_fill_poke(pokemon = 'Quilava', spread = 6)
+# g=g+theme(axis.text.x = element_text(angle = 145, hjust = 1, vjust = 0),axis.line = element_blank(),axis.ticks.x = element_blank())
+g=g+theme(axis.text.x = element_blank(),axis.ticks.x = element_blank())
+g=g+theme(legend.background = element_rect(fill="#b2c8d6",
+                                  size=0.5, linetype="solid",
+                                  colour ="#141933"))
+g
+
+```
+
+
